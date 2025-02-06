@@ -45,6 +45,7 @@ class AiArticle extends Weapp
         parent::__construct();
         $this->model = new AiArticleModel;
         $this->db = Db::name('WeappAiArticle');
+        $this->conf = Db::name('WeappAiArticleConf');
 
         /*插件基本信息*/
         $this->weappInfo = $this->getWeappInfo();
@@ -134,17 +135,31 @@ class AiArticle extends Weapp
             }
             exit;
         }
+        $conf = M('weapp_ai_article_conf')->find();
+        if (empty($conf)) {
+            $this->error('请先配置插件！',weapp_url('AiArticle/AiArticle/conf'));
+            exit; 
+        }
+        $this->assign('conf',$conf);
 
         //获取eyoucms中为文章模型的所有的栏目列表
         $articleTypeList = Db::name('arctype')->field('id,parent_id,topid,typename,lang')->where('channeltype=1')->select();
-        // dump($articleTypeList);
         $tree = $this->buildTree($articleTypeList,0);
-        // dump($tree);
         //生成 HTML 格式的 select option 列表
         $tree = $this->selectTree($tree);
-        dump($tree);
         $this->assign('articleTypeList', $tree);
         //获取eyoucms中为文章模型的所有的栏目列表结束
+
+        //获取当前系统是否为多语言
+        $lang_switch_on = false;
+        $langnum_file = DATA_PATH.'conf'.DS.'lang_enable_num.txt';
+        if (file_exists($langnum_file)) {
+            $langnum = @file_get_contents($langnum_file);
+            if (!empty($langnum) && 1 < $langnum) {
+                $lang_switch_on = true;
+            }
+        }
+        dump($lang_switch_on);
 
         return $this->fetch('add');
     }
@@ -241,24 +256,26 @@ class AiArticle extends Weapp
     {
         if (IS_POST) {
             $post = input('post.');
-            if(!empty($post['code'])){
-                $data = array(
-                    'tag_weapp' => $post['tag_weapp'],
-                    'update_time' => getTime(),
-                );
-                $r = M('weapp')->where('code','eq',$post['code'])->update($data);
-                if ($r) {
-                    \think\Cache::clear('hooks');
-                    adminLog('编辑'.$this->weappInfo['name'].'：插件配置'); // 写入操作日志
-                    $this->success("操作成功!", weapp_url('AiArticle/AiArticle/conf'));
-                }
+            $post['updated_time'] = getTime();
+            $text = '编辑';
+            // $this->success("操作成功!", weapp_url('AiArticle/AiArticle/conf'),$post);
+            if(!empty($post['id'])){
+                $r = M('weapp_ai_article_conf')->where(array('id'=>$post['id']))->update($post);
+            }else{
+                $post['created_time'] = getTime();
+                $text = '新增';
+                $r = M('weapp_ai_article_conf')->insert($post);
+            }
+            if ($r) {
+                \think\Cache::clear('hooks');
+                adminLog($text.$this->weappInfo['name'].'：插件配置'); // 写入操作日志
+                $this->success("操作成功!", weapp_url('AiArticle/AiArticle/conf'));
             }
             $this->error("操作失败!");
         }
 
-        $row = M('weapp')->where('code','eq','AiArticle')->find();
-        $this->assign('row', $row);
-
+        $row = M('weapp_ai_article_conf')->find();
+        $this->assign('row',$row);
         return $this->fetch('conf');
     }
 

@@ -32,11 +32,11 @@ CREATE TABLE `#@__weapp_ai_article` (
   `article_count` INT(11) DEFAULT 1 COMMENT '生成文章数量',
   `bind_column_id` INT(11) DEFAULT NULL COMMENT '要绑定的栏目ID',
   `bind_column_id_lang` VARCHAR(20) DEFAULT NULL COMMENT '绑定的中文栏目ID,逗号或者序列化格式:ID-语言标识',
-  `is_translate` TINYINT(1) DEFAULT 0 COMMENT '是否翻译并发布到其他语言',
+  `is_translate` TINYINT(1) DEFAULT 0 COMMENT '是否翻译并发布到其他语言,0=否,1=是',
   `publish_schedule` TEXT DEFAULT NULL COMMENT '定时发布规则（序列化格式）',
   `publish_count` INT(11) DEFAULT 1 COMMENT '每次发布的文章数量，默认为 1',
-  `created_time` INT(11) NOT NULL COMMENT '创建时间',
-  `updated_time` INT(11) NOT NULL COMMENT '更新时间',
+  `created_time` INT(11) DEFAULT 0 COMMENT '创建时间',
+  `updated_time` INT(11) DEFAULT 0 COMMENT '更新时间',
   PRIMARY KEY (`id`) 
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='AI文章生成配置表';
 
@@ -59,8 +59,8 @@ CREATE TABLE `#@__weapp_ai_article_conf` (
   `translate_model_name` VARCHAR(100) DEFAULT NULL COMMENT '翻译模型名称',
   `translate_model_identifier` VARCHAR(100) DEFAULT NULL COMMENT '翻译模型标识',
   `translate_config_key` VARCHAR(255) DEFAULT NULL COMMENT '翻译配置Key',
-  `created_time` INT(11) NOT NULL COMMENT '创建时间',
-  `updated_time` INT(11) NOT NULL COMMENT '更新时间',
+  `created_time` INT(11) DEFAULT 0 COMMENT '创建时间',
+  `updated_time` INT(11) DEFAULT 0 COMMENT '更新时间',
   PRIMARY KEY (`id`) 
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='插件全局配置参数表';
 
@@ -94,7 +94,7 @@ CREATE TABLE `#@__weapp_ai_article_lists` (
   `seo_description` TEXT DEFAULT NULL COMMENT 'SEO描述',
   `status` TINYINT(1) DEFAULT '1' COMMENT ' 发布状态(1=已发布，0=未发布)',
   `publish_time` INT(11) DEFAULT NULL COMMENT '发布时间',
-  `created_time` INT(11) NOT NULL COMMENT '创建时间',
-  `updated_time` INT(11) NOT NULL COMMENT '更新时间',
+  `created_time` INT(11) DEFAULT 0 COMMENT '创建时间',
+  `updated_time` INT(11) DEFAULT 0 COMMENT '更新时间',
   PRIMARY KEY (`id`) 
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='AI文章列表';
