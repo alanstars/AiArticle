@@ -37,23 +37,23 @@
                         <th abbr="article_show" axis="col5" class="w40">
                             <div class="tc">ID</div>
                         </th>
-                        <th abbr="article_title" axis="col3" class="w250">
-                            <div class="tc">网站名称</div>
+                        <th abbr="article_title" axis="col3" class="w400">
+                            <div class="tc">文章主题</div>
                         </th>
                         <th abbr="ac_id" axis="col4">
-                            <div style="text-align: left; padding-left: 10px;" class="">链接地址</div>
+                            <div style="text-align: left; padding-left: 10px;" class="">SEO 参数</div>
                         </th>
                         <th abbr="article_time" axis="col6" class="w100">
-                            <div class="tc">新窗口</div>
+                            <div class="tc">绑定栏目</div>
                         </th>
                         <th abbr="article_time" axis="col6" class="w160">
-                            <div class="tc">更新时间</div>
+                            <div class="tc">生成和发布数量</div>
+                        </th>
+                        <th abbr="article_time" axis="col6" class="w160">
+                            <div class="tc">发布时间规则</div>
                         </th>
                         <th axis="col1" class="w120">
                             <div class="tc">操作</div>
-                        </th>
-                        <th abbr="article_show" axis="col5" class="w60">
-                            <div class="tc">排序</div>
                         </th>
                     </tr>
                     </thead>
@@ -84,27 +84,30 @@
                                 </div>
                             </td>
                             <td class="">
-                                <div class="w250 tc">
-                                    <a href="{:weapp_url('AiArticle/AiArticle/edit',array('id'=>$vo['id']))}">{$vo.title}</a>
+                                <div class="w400 tc">
+                                    <a href="{:weapp_url('AiArticle/AiArticle/edit',array('id'=>$vo['id']))}">{$vo.article_theme}</a>
                                 </div>
                             </td>
                             <td class="" style="width: 100%;">
                                 <div class="tl" style="padding-left: 10px;">
-                                    {$vo.url}
+                                    {$vo.seo_parameters}
                                 </div>
                             </td>
                             <td class="">
                                 <div class="w100 tc">
-                                    {eq name="$vo['target']" value='1'}
-                                        <span class="yes" onClick="changeTableVal('weapp_aiarticle','id','{$vo.id}','target',this);"><i class="fa fa-check-circle"></i>是</span>
-                                    {else /}
-                                        <span class="no" onClick="changeTableVal('weapp_aiarticle','id','{$vo.id}','target',this);"><i class="fa fa-ban"></i>否</span>
-                                    {/eq}
+                                    {$vo.bind_column_id}
                                 </div>
                             </td>
                             <td class="">
                                 <div class="w160 tc">
-                                    {$vo.update_time|MyDate='Y-m-d H:i:s',###}
+                                    {$vo.article_count}--{$vo.publish_count}<br>
+                                    {$vo.updated_time|MyDate='Y-m-d H:i:s',###}
+                                </div>
+                            </td>
+                            <td class="">
+                                <div class="w160 tc">
+                                    {$vo.publish_schedule}<br>
+                                    {$vo.created_time|MyDate='Y-m-d H:i:s',###}
                                 </div>
                             </td>
                             <td class="operation">
@@ -114,11 +117,11 @@
                                     <a class="btn red"  href="javascript:void(0)" data-url="{:weapp_url('AiArticle/AiArticle/del')}" data-id="{$vo.id}" onClick="delfun(this);">删除</a>
                                 </div>
                             </td>
-                            <td class="sort">
+                            <!-- <td class="sort">
                                 <div class="w60 tc">
                                     <input style="text-align: left;" type="text" onkeyup="this.value=this.value.replace(/[^\d]/g,'');" onpaste="this.value=this.value.replace(/[^\d]/g,'');" onchange="changeTableVal('weapp_aiarticle','id','{$vo.id}','sort_order',this);" size="4"  value="{$vo.sort_order}" />
                                 </div>
-                            </td>
+                            </td> -->
                         </tr>
                         {/volist}
                     {/empty}

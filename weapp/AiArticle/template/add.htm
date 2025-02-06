@@ -64,6 +64,7 @@
                         <p class="notic"></p>
                     </dd>
                 </dl>
+                {if $langSwitchOn}
                 <dl class="row">
                     <dt class="tit">
                         <label for="is_translate">是否翻译其他语言</label>
@@ -82,13 +83,13 @@
                     </dt>
                     <dd class="opt">
                         <select name="bind_column_id_lang" id="bind_column_id_lang" class="input-txt">
-                            {$articleTypeList}
+                            {$tree}
                         </select>
                         <span class="err"></span>
                         <p class="notic"></p>
                     </dd>
                 </dl>
-
+                {/if}
                 <dl class="row">
                     <dt class="tit">
                         <label for="publish_schedule">定时发布规则</label>
@@ -123,14 +124,16 @@
         //当is_translate值为 1 时，显示bind_column_id_lang
         $('input[name=is_translate]').change(function () {
             if ($(this).val() == 1) {
-                $('#bind_column_id_lang').show(); 
+                $('#bind_column_id_lang').show();
             } else {
                 $('#bind_column_id_lang').hide();
             }
+            // $('input[name=is_translate]').val($(this).val());
         })
 
         function checkForm() {
             var formData = $('#post_form').serialize();
+            var bind_column_id_lang = 0;
             if ($('input[name=article_theme]').val() == '') {
                 showErrorMsg('文章主题不能为空！');
                 $('input[name=article_theme]').focus();
@@ -147,32 +150,46 @@
                 return false;
             }
             if ($('input[name=is_translate]').val() == 0) {
-                    formData += '&bind_column_id_lang=0';
+                bind_column_id_lang = 0;
+            } else {
+                bind_column_id_lang = $('select[name=bind_column_id_lang]').find('option:selected').val();
             }
-            
-            // layer_loading('正在处理');
-            // $.ajax({
-            //     type: 'post',
-            //     url: "{:weapp_url('AiArticle/AiArticle/add', ['_ajax'=>1])}",
-            //     data: $('#post_form').serialize(),
-            //     dataType: 'json',
-            //     success: function (res) {
-            //         layer.closeAll();
-            //         if (res.code == 1) {
-            //             var _parent = parent;
-            //             _parent.layer.close(parentObj);
-            //             _parent.layer.msg(res.msg, { shade: layer_shade, time: 1000 }, function () {
-            //                 _parent.window.location.reload();
-            //             });
-            //         } else {
-            //             showErrorMsg(res.msg);
-            //         }
-            //     },
-            //     error: function (e) {
-            //         layer.closeAll();
-            //         showErrorAlert(e.responseText);
+
+            // $('input[name=is_translate]').change(function () {
+            //     if ($(this).val() == 0) {
+            //         bind_column_id_lang = 0;
+            //     } else {
+            //         bind_column_id_lang = $('select[name=bind_column_id_lang]').find('option:selected').val();
             //     }
+            //     $('input[name=is_translate]').val($(this).val());
             // });
+            console.log($('input[name=is_translate]').val());
+            formData += '&bind_column_id_lang=' + bind_column_id_lang;
+            console.log(formData);
+
+            layer_loading('正在处理');
+            $.ajax({
+                type: 'post',
+                url: "{:weapp_url('AiArticle/AiArticle/add', ['_ajax'=>1])}",
+                data: formData,
+                dataType: 'json',
+                success: function (res) {
+                    layer.closeAll();
+                    if (res.code == 1) {
+                        var _parent = parent;
+                        _parent.layer.close(parentObj);
+                        _parent.layer.msg(res.msg, { shade: layer_shade, time: 1000 }, function () {
+                            _parent.window.location.reload();
+                        });
+                    } else {
+                        showErrorMsg(res.msg);
+                    }
+                },
+                error: function (e) {
+                    layer.closeAll();
+                    showErrorAlert(e.responseText);
+                }
+            });
         }
     </script>
     {include file="footer.htm" /}
