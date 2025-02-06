@@ -138,7 +138,6 @@ class AiArticle extends Weapp
         //获取eyoucms中为文章模型的所有的栏目列表
         $articleTypeList = Db::name('arctype')->field('id,parent_id,topid,typename,lang')->where('channeltype=1')->select();
         $tree = $this->buildTree($articleTypeList,0);
-        dump($tree);
         $this->assign('articleTypeList', $tree);
         //获取eyoucms中为文章模型的所有的栏目列表结束
 
