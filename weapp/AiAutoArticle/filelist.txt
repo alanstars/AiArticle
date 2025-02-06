@@ -1,0 +1,6 @@
+template/plugins/aiautoarticle/pc/index.htm
+template/plugins/aiautoarticle/mobile/index.htm
+application/plugins/logic/AiAutoArticleLogic.php
+application/plugins/controller/AiAutoArticle.php
+application/plugins/model/AiAutoArticle.php
+weapp/AiAutoArticle

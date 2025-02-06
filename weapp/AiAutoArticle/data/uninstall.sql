@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS `#@__weapp_ai_auto_article`;
