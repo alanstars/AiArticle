@@ -135,9 +135,6 @@ class AiArticle extends Weapp
             exit;
         }
 
-        $arctype_html = allow_release_arctype(0,1);
-        dump($arctype_html);
-
         //获取eyoucms中为文章模型的所有的栏目列表
         $articleTypeList = Db::name('arctype')->field('id,parent_id,topid,typename,lang')->where('channeltype=1')->select();
         $tree = $this->buildTree($articleTypeList,0);
