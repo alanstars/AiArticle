@@ -1,16 +1,5 @@
 /*
 Navicat MySQL Data Transfer
-
-Source Server         : localhost_3306
-Source Server Version : 50553
-Source Host           : localhost:3306
-Source Database       : eyoucms_develop
-
-Target Server Type    : MYSQL
-Target Server Version : 50553
-File Encoding         : 65001
-
-Date: 2023-10-10
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -51,7 +40,7 @@ CREATE TABLE `#@__weapp_ai_article` (
   `created_time` INT(11) NOT NULL COMMENT '创建时间',
   `updated_time` INT(11) NOT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='AI文章和配置表';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='AI文章生成配置表';
 
 -- ----------------------------------
 -- Table structure for #@__weapp_ai_article_conf
@@ -63,8 +52,8 @@ CREATE TABLE `#@__weapp_ai_article` (
 -- translate_model_identifier: 翻译模型的标识符。
 -- translate_config_key: 翻译配置的密钥。
 -- ----------------------------------
-DROP TABLE IF EXISTS `#@_weapp_ai_article_conf`;
-CREATE TABLE `#@_weapp_ai_article_conf` (
+DROP TABLE IF EXISTS `#@__weapp_ai_article_conf`;
+CREATE TABLE `#@__weapp_ai_article_conf` (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
   `ai_model_name` VARCHAR(100) NOT NULL COMMENT 'AI模型名称',
   `ai_model_identifier` VARCHAR(100) NOT NULL COMMENT 'AI模型标识',
@@ -72,7 +61,10 @@ CREATE TABLE `#@_weapp_ai_article_conf` (
   `translate_model_name` VARCHAR(100) DEFAULT NULL COMMENT '翻译模型名称',
   `translate_model_identifier` VARCHAR(100) DEFAULT NULL COMMENT '翻译模型标识',
   `translate_config_key` VARCHAR(255) DEFAULT NULL COMMENT '翻译配置Key',
-)
+  `created_time` INT(11) NOT NULL COMMENT '创建时间',
+  `updated_time` INT(11) NOT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='插件全局配置参数表';
 
 -- ----------------------------
 -- Records of #@__weapp_ai_article_lists
@@ -89,6 +81,7 @@ CREATE TABLE `#@_weapp_ai_article_conf` (
 -- seo_description: SEO描述。
 -- status: 发布状态(1=已发布，0=未发布)。
 -- publish_time: 发布时间。
+------------------------------------
 DROP TABLE IF EXISTS `#@__weapp_ai_article_lists`;
 CREATE TABLE `#@__weapp_ai_article_lists` (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',

@@ -6,39 +6,7 @@
 <div class="page">
     <form class="form-horizontal" id="post_form" action="{:weapp_url('AiArticle/AiArticle/add')}" method="post">
         <div class="ncap-form-default">
-            <dl class="row">
-                <dt class="tit">
-                    <label for="ai_model_name"><em>*</em>AI 模型名称</label>
-                </dt>
-                <dd class="opt">
-                    <input type="text" name="ai_model_name" value="" id="ai_model_name" class="input-txt" required>
-                    <span class="err"></span>
-                    <p class="notic"></p>
-                </dd>
-            </dl>
-            <dl class="row">
-                <dt class="tit">
-                    <label for="ai_model_identifier"><em>*</em>AI 模型标识</label>
-                </dt>
-                <dd class="opt">
-                    <select name="article_language" id="article_language" class="input-txt">
-                        <option value="dp">DeepSeek</option>
-                        <option value="ct">ChatGPT</option>
-                    </select>
-                    <span class="err"></span>
-                    <p class="notic"></p>
-                </dd>
-            </dl>
-            <dl class="row">
-                <dt class="tit">
-                    <label for="ai_config_key"><em>*</em>AI 配置密钥</label>
-                </dt>
-                <dd class="opt">
-                    <input type="text" name="ai_config_key" value="" id="ai_config_key" class="input-txt" required>
-                    <span class="err"></span>
-                    <p class="notic"></p>
-                </dd>
-            </dl>
+            
             <dl class="row">
                 <dt class="tit">
                     <label for="article_theme">生成文章主题</label>

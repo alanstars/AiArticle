@@ -138,6 +138,8 @@ class AiArticle extends Weapp
         //获取eyoucms中为文章模型的所有的栏目列表
         $articleTypeList = Db::name('arctype')->field('id,parent_id,topid,typename,lang')->where('channeltype=1')->select();
         $tree = $this->buildTree($articleTypeList,0);
+        //生成 HTML 格式的 select option 列表
+        $tree = $this->selectTree($tree);
         $this->assign('articleTypeList', $tree);
         //获取eyoucms中为文章模型的所有的栏目列表结束
 
@@ -265,14 +267,17 @@ class AiArticle extends Weapp
      * @param int $parentId The parent ID to start building the tree from.
      * @return array The tree structure of categories.
      */
-    private function buildTree(array $elements, $parentId = 0) {
+    private function buildTree(array $elements, $parentId = 0,$level = 0) {
         $branch = array();
-
+        
         foreach ($elements as $element) {
             if ($element['parent_id'] == $parentId) {
-                $children = $this->buildTree($elements, $element['id']);
+                $element['level'] = $level;
+                $level++;
+                $children = $this->buildTree($elements, $element['id'],$level);
                 if ($children) {
                     $element['children'] = $children;
+                    $element['level'] = $level;
                 }
                 $branch[] = $element;
             }
@@ -280,4 +285,20 @@ class AiArticle extends Weapp
 
         return $branch;
     }
+    /**
+     * 把多维数组生成带有层级关系的HTML格式的select option列表
+     *
+     * @param array $tree 多维数组
+     * @param int $level 层级
+     *
+     **/
+    private function selectTree($tree, $level = 0) {
+        $html = '';
+        $nbsp = str_repeat('&nbsp;&nbsp;--', $level);
+        foreach ($tree as $node) {
+            $html .= '<option value="' . $node['id'] . '">' . $nbsp . '>'.$node['typename'] . '</option>'; 
+        } 
+        return $html;
+    }
+
 }
