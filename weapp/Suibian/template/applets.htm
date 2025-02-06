@@ -1,0 +1,107 @@
+{include file="header.htm" /}
+<body class="bodystyle" style="cursor: default; -moz-user-select: inherit; height: calc( 100% - 22px );">
+<div id="append_parent"></div>
+<div id="ajaxwaitid"></div>
+{include file="left" /}
+<div class="page min-hg-c-20" style="min-width:auto;margin-left:100px;padding-bottom: 0;">
+    <div class="flexigrid">
+        <div class="mDiv pt0">
+            <div class="ftitle">
+                <div class="fbutton">
+                    <a href="javascript:void(0);" data-href="{:weapp_url('Suibian/Suibian/applets_add')}" onclick="openFullframe(this, '添加小程序', '40%', '70%');"><div class="add"><span><i class="layui-icon layui-icon-addition"></i>添加小程序</span></div></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="hDiv">
+            <div class="hDivBox">
+                <table cellspacing="0" cellpadding="0" style="width: 100%">
+                    <thead>
+                        <tr>
+                            <th class="w40"><div class="tc">ID</div></th>
+                            <th><div style="text-align: left; padding-left: 10px;">小程序名称</div></th>
+                            <th class="w160"><div class="tc">小程序类型</div></th>
+                            <th class="w200"><div class="tc">操作</div></th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+
+        <div class="bDiv" style="height: auto;">
+            <div id="flexigrid" cellpadding="0" cellspacing="0" border="0">
+                <table style="width: 100%">
+                    <tbody>
+                        {empty name="list"}
+                        <tr>
+                            <td class="no-data" align="center" axis="col0" colspan="50">
+                                <div class="no_row">
+                                    <div class="no_pic"><img src="__SKIN__/images/null-data.png"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        {else/}
+                        {foreach name="list" item="vo" key="k" }
+                        <tr>
+                            <td class="sort"> <div class="w40 tc">{$vo.applets_id}</div> </td>
+                            <td style="width: 100%;"> <div class="tl text-l10">{$vo.applets_name}</div> </td>
+                            <td>
+                                <div class="w160 tc" style="display: flex; flex-direction: row; align-items: center; justify-content: center;">
+                                    <img class="mr5" src="__WEAPP_TEMPLATE__/skin/images/{$vo.applets_mark}.png" style="width: 30px; height: 30px;">
+                                    {$vo.applets_type_name}
+                                </div>
+                            </td>
+                            <td class="operation">
+                                <div class="w200 tc">
+                                    <a href="javascript:void(0);" data-href="{:weapp_url('Suibian/Suibian/applets_edit', ['applets_id'=>$vo.applets_id])}" onclick="openFullframe(this, '编辑{$vo.applets_name}', '40%', '70%');" class="btn blue">编辑</a>
+                                    <i></i>
+                                    <a class="btn blue" href="javascript:void(0);" data-id="{$vo.applets_id}" onclick="delAppletsConfig(this);">删除</a>
+                                </div>
+                            </td>
+                        </tr>
+                        {/foreach}
+                        {/empty}
+                    </tbody>
+                </table>
+            </div>
+            <div class="iDiv" style="display: none;"></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        // 表格行点击选中切换
+        $('#flexigrid > table>tbody >tr').click(function(){
+            $(this).toggleClass('trSelected');
+        });
+    });
+
+    function delAppletsConfig(obj) {
+        showConfirm('确认删除此小程序？', {}, function() {
+            layer_loading('正在处理');
+            $.ajax({
+                url : "{:weapp_url('Suibian/Suibian/delAppletsConfig')}",
+                data: {applets_id: $(obj).data('id'), _ajax: 1},
+                type: 'post',
+                dataType: 'json',
+                success: function(res) {
+                    layer.closeAll();
+                    if (1 === parseInt(res.code)) {
+                        $(obj).parent().parent().parent().remove();
+                        // showSuccessMsg(res.msg, 1500, function() {
+                        //     window.location.reload();
+                        // });
+                    } else {
+                        showErrorAlert(res.msg);
+                    }
+                },
+                error: function(e) {
+                    layer.closeAll();
+                    showErrorAlert(e.responseText);
+                }
+            });
+        });
+    }
+</script>
+{include file="footer.htm" /}

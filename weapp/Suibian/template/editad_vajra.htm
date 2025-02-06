@@ -1,0 +1,184 @@
+{include file="header.htm" /}
+<body class="bodystyle" style="overflow-y: scroll; cursor: default; -moz-user-select: inherit;">
+<div id="toolTipLayer" style="position: absolute; z-index: 9999; display: none; visibility: visible; left: 95px; top: 573px;"></div>
+<div id="append_parent"></div>
+<div id="ajaxwaitid"></div>
+<div class="page min-hg-c-20">
+    <div class="flexigrid">
+        <div class="bDiv" style="height: auto;">
+            <div class="adv-row-con">
+                {foreach name="list" item="vo" key="k" }
+                <div class="adv-col-5">
+                    <div class="adv-etm">
+                        <div class="adv-etm-l">
+                            <img id="contentImagesSrc_{$vo.content_id}" src="{$vo.content_images}">
+                            <span class="s-tihuan"><i class="iconfont e-bianji2 f-24" onclick="updateVajraContentPic({$vo.content_id}, 1);"></i></span>
+                        </div>
+                        <div class="adv-etm-r">
+                            <div class="title">
+                                <input type="text" value="{$vo.content_title}" id="contentTitleHidden_{$vo.content_id}" placeholder="请输入标题" class="input-txt" onchange="changeTableVal('weapp_applets_ad_content', 'content_id', '{$vo.content_id}', 'content_title', this);">
+                            </div>
+                            <div class="hiddenArr">
+                                <input type="hidden" value="{$vo.host_id}" id="hostIDHidden_{$vo.content_id}">
+                                <input type="hidden" value="{$vo.link_id}" id="linkIDHidden_{$vo.content_id}">
+                                <input type="hidden" value="{$vo.content_id}" id="contentIDHidden_{$vo.content_id}">
+                                <input type="hidden" value="{$vo.content_images}" id="contentImagesHidden_{$vo.content_id}">
+                            </div>
+                            <div class="set-bt">
+                                <span id="linkNames_{$vo.content_id}" style="width: 67%;">{$vo.link_names}</span>
+                                <a class="fr curpoin" style="width: 33%%;" href="javascript:void(0);" data-href="{:weapp_url('Suibian/Suibian/select_link')}" onclick="selectVajraContentPicLink(this, {$vo.content_id});">设置链接</a>
+                            </div>
+                        </div>
+                        <span class="delect" href="javascript:void(0);" title="删除" data-id="{$vo.content_id}" onclick="clearVajraContentPic(this);"></span>
+                    </div>
+                </div>
+                {/foreach}
+
+                <div class="adv-col-5" id="uploads_adv">
+                    <div class="adv-etm">
+                        <div class="adv-etm-l">
+                            <img id="contentImagesSrc_999999999" src="">
+                            <span class="s-tihuan"><i class="iconfont e-bianji2 f-24" onclick="updateVajraContentPic(999999999, 0);"></i></span>
+                        </div>
+                        <div class="adv-etm-r">
+                            <div class="title">
+                                <input type="text" id="contentTitleHidden_999999999" placeholder="请输入标题" class="input-txt">
+                            </div>
+                            <div class="hiddenArr">
+                                <input type="hidden" value="0" id="hostIDHidden_999999999">
+                                <input type="hidden" value="0" id="linkIDHidden_999999999">
+                                <input type="hidden" value="0" id="contentIDHidden_999999999">
+                                <input type="hidden" value="" id="contentImagesHidden_999999999">
+                            </div>
+                            <div class="set-bt">
+                                <span id="linkNames_999999999" style="width: 67%;"></span>
+                                <a class="fr curpoin" style="width: 33%%;" href="javascript:void(0);" data-href="{:weapp_url('Suibian/Suibian/select_link')}" onclick="selectVajraContentPicLink(this, 999999999);">设置链接</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="iDiv" style="display: none;"></div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var currentID = 0;
+    var currentType = 0;
+    // 获取点击更新图片的ID并加载隐藏域
+    function updateVajraContentPic(value, type) {
+        currentID = value;
+        currentType = type;
+        // 调用图片上传JS
+        GetUploadify(1, '', 'allimg', 'updateVajraContentPicBack');
+    }
+
+    // 更新图片
+    function updateVajraContentPicBack(contentImages) {
+        layer_loading('正在处理');
+        $.ajax({
+            type: 'post',
+            url : "{:weapp_url('Suibian/Suibian/vajraAction', ['_ajax'=>1])}",
+            data: {
+                action: 1 === parseInt(currentType) ? 'update' : 'insert',
+                content_id: currentID,
+                content_images: contentImages,
+                link_id: $('#linkIDHidden_' + currentID).val(),
+                host_id: $('#hostIDHidden_' + currentID).val(),
+                content_title: $('#contentTitleHidden_' + currentID).val(),
+            },
+            dataType: 'json',
+            success: function(res) {
+                layer.closeAll();
+                if (1 === parseInt(res.code)) {
+                    // 加载图片到显示层
+                    $("#contentImagesSrc_" + currentID).attr('src', contentImages);
+                    // 加载图片到提交的隐藏域
+                    $("#contentImagesHidden_" + currentID).val(contentImages);
+                    showSuccessMsg(res.msg, 1000, function() {
+                        if (0 === parseInt(currentType)) window.location.reload();
+                    });
+                } else {
+                    showErrorMsg(res.msg);
+                }
+            },
+            error: function(e) {
+                layer.closeAll();
+                showErrorAlert(e.responseText);
+            }
+        });
+        
+    }
+
+    // 选择链接
+    function selectVajraContentPicLink(obj, value) {
+        $(obj).data('ad_host_id', $('#hostIDHidden_' + value).val());
+        $(obj).data('ad_link_id', $('#linkIDHidden_' + value).val());
+
+        // 打开选择链接
+        selectAdLink(obj, function(result) {
+            if (0 < parseInt(value) && 999999999 != parseInt(value)) {
+                layer_loading('正在处理');
+                $.ajax({
+                    type: 'post',
+                    url : "{:weapp_url('Suibian/Suibian/vajraAction', ['_ajax'=>1])}",
+                    data: {action: 'update', content_id: value, link_id: result.link_id, host_id: result.host_id},
+                    dataType: 'json',
+                    success: function(res) {
+                        layer.closeAll();
+                        if (1 === parseInt(res.code)) {
+                            showSuccessMsg(res.msg);
+                            $('#hostIDHidden_' + value).val(result.host_id);
+                            $('#linkIDHidden_' + value).val(result.link_id);
+                            $('#linkNames_' + value).html(result.link_names);
+                        } else {
+                            showErrorMsg(res.msg);
+                        }
+                    },
+                    error: function(e) {
+                        layer.closeAll();
+                        showErrorAlert(e.responseText);
+                    }
+                });
+            } else {
+                $('#hostIDHidden_' + value).val(result.host_id);
+                $('#linkIDHidden_' + value).val(result.link_id);
+                $('#linkNames_' + value).html(result.link_names);
+            }
+        });
+    }
+
+    // 上传之后删除组图input
+    function clearVajraContentPic(obj) {
+        var content_id = $(obj).data('id');
+        if (0 < parseInt(content_id) && 999999999 != parseInt(content_id)) {
+            showConfirm('确认删除这个金刚位内容？', {}, function() {
+                layer_loading('正在处理');
+                $.ajax({
+                    type: 'post',
+                    url : "{:weapp_url('Suibian/Suibian/vajraAction', ['_ajax'=>1])}",
+                    data: {action: 'delete', content_id: content_id},
+                    dataType: 'json',
+                    success: function(res) {
+                        layer.closeAll();
+                        if (1 === parseInt(res.code)) {
+                            showSuccessMsg(res.msg);
+                            $(obj).parent().parent().remove();
+                        } else {
+                            showErrorMsg(res.msg);
+                        }
+                    },
+                    error: function(e) {
+                        layer.closeAll();
+                        showErrorAlert(e.responseText);
+                    }
+                });
+            })
+        } else {
+            showErrorMsg('数据错误', 1000, function() {
+                window.location.reload();
+            });
+        }
+    }
+</script>
+{include file="footer.htm" /}

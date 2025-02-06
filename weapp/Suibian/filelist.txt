@@ -1,0 +1,4 @@
+application/plugins/logic/SuibianLogic.php
+application/plugins/model/SuibianPluginsModel.php
+application/common/model/WeappAppletsConfigList.php
+weapp/Suibian

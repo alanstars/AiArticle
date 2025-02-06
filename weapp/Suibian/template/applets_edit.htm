@@ -1,0 +1,215 @@
+{include file="header.htm" /}
+<style type="text/css">
+    .ncap-form-default dd.opt {
+        width: auto;
+    }
+</style>
+<body class="bodystyle" style="background-color: rgb(255, 255, 255); overflow: auto; cursor: default; -moz-user-select: inherit;min-width: auto;padding-bottom: 0px;">
+<div id="append_parent"></div>
+<div id="ajaxwaitid"></div>
+<div class="page pt0 pb0" style="min-width: auto;box-shadow:none;">
+    <div class="flexigrid htitx">
+        <form class="form-horizontal" id="postForm">
+            <input type="hidden" name="applets_id" value="{$config.applets_id}">
+            <input type="hidden" name="applets_type" value="{$config.applets_type}">
+            <div class="ncap-form-default pb0" style="position: sticky;">
+                <dl class="row">
+                    <dt class="tit"><label><em>*</em>小程序类型</label></dt>
+                    <dd class="opt">
+                        <label class="curpoin">
+                            <input type="radio" {eq name="$config.applets_type" value="1"} checked {else/} disabled class="no-drop" {/eq}>微信小程序
+                        </label>
+                        &nbsp;
+                        <label class="curpoin">
+                            <input type="radio" {eq name="$config.applets_type" value="2"} checked {else/} disabled class="no-drop" {/eq}>百度小程序
+                        </label>
+                        &nbsp;
+                        <label class="curpoin">
+                            <input type="radio" {eq name="$config.applets_type" value="3"} checked {else/} disabled class="no-drop" {/eq}>抖音小程序
+                        </label>
+                    </dd>
+                </dl>
+
+                <dl class="row">
+                    <dt class="tit"><label for="applets_name"><em>*</em>小程序名称</label></dt>
+                    <dd class="opt">
+                        <input type="text" name="applets_name" id="applets_name" value="{$config.applets_name}" class="input-txt" autocomplete="off">
+                    </dd>
+                </dl>
+                
+                {eq name="$config.applets_type" value="1"}
+                <div class="weixin" id="applets_weixin">
+                    <dl class="row"><dt class="tit"><label><b>微信登录</b></label></dt></dl>
+                    <dl class="row">
+                        <dt class="tit"><label for="weixin_appid"><em>*</em>AppID</label></dt>
+                        <dd class="opt">
+                            <input type="text" name="weixin[appid]" id="weixin_appid" value="{$config.applets_config.appid}" class="input-txt" autocomplete="off">
+                            <p class="notic">小程序ID</p>
+                        </dd>
+                    </dl>
+                    <dl class="row">
+                        <dt class="tit"><label for="weixin_appsecret"><em>*</em>AppSecret</label></dt>
+                        <dd class="opt">
+                            <input type="text" name="weixin[appsecret]" id="weixin_appsecret" value="{$config.applets_config.appsecret}" class="input-txt" autocomplete="off">
+                            <p class="notic">小程序密钥</p>
+                        </dd>
+                    </dl>
+                    <dl class="row"><dt class="tit"><label><b>微信支付</b></label></dt></dl>
+                    <dl class="row">
+                        <dt class="tit"><label for="weixin_mchid">商户号</label></dt>
+                        <dd class="opt">
+                            <input type="text" name="weixin[mchid]" id="weixin_mchid" value="{$config.applets_config.mchid}" class="input-txt" autocomplete="off">
+                            <p class="notic">商户ID</p>
+                        </dd>
+                    </dl>
+                    <dl class="row">
+                        <dt class="tit"><label for="weixin_apikey">APIv2密钥</label></dt>
+                        <dd class="opt">
+                            <input type="text" name="weixin[apikey]" id="weixin_apikey" value="{$config.applets_config.apikey}" class="input-txt" autocomplete="off">
+                            <p class="notic">APIv2密钥</p>
+                        </dd>
+                    </dl>
+                </div>
+                {/eq}
+
+                {eq name="$config.applets_type" value="2"}
+                <div class="baidu" id="applets_baidu">
+                    <dl class="row"><dt class="tit"><label><b>百度登录</b></label></dt></dl>
+                    <dl class="row">
+                        <dt class="tit"><label for="baidu_appid"><em>*</em>AppID</label></dt>
+                        <dd class="opt">
+                            <input type="text" name="baidu[appid]" id="baidu_appid" value="{$config.applets_config.appid}" class="input-txt" autocomplete="off">
+                            <p class="notic">智能小程序ID</p>
+                        </dd>
+                    </dl>
+                    <dl class="row">
+                        <dt class="tit"><label for="baidu_appkey"><em>*</em>AppKey</label></dt>
+                        <dd class="opt">
+                            <input type="text" name="baidu[appkey]" id="baidu_appkey" value="{$config.applets_config.appkey}" class="input-txt" autocomplete="off">
+                            <p class="notic">智能小程序Key</p>
+                        </dd>
+                    </dl>
+                    <dl class="row">
+                        <dt class="tit"><label for="baidu_appsecret"><em>*</em>AppSecret</label></dt>
+                        <dd class="opt">
+                            <input type="text" name="baidu[appsecret]" id="baidu_appsecret" value="{$config.applets_config.appsecret}" class="input-txt" autocomplete="off">
+                            <p class="notic">智能小程序密匙</p>
+                        </dd>
+                    </dl>
+                </div>
+                {/eq}
+
+                {eq name="$config.applets_type" value="3"}
+                <div class="douyin" id="applets_toutiao">
+                    <dl class="row"><dt class="tit"><label><b>抖音登录</b></label></dt></dl>
+                    <dl class="row">
+                        <dt class="tit"><label for="toutiao_appid"><em>*</em>AppID</label></dt>
+                        <dd class="opt">
+                            <input type="text" name="toutiao[appid]" id="toutiao_appid" value="{$config.applets_config.appid}" class="input-txt" autocomplete="off">
+                            <p class="notic">小程序ID</p>
+                        </dd>
+                    </dl>
+                    <dl class="row">
+                        <dt class="tit"><label for="toutiao_appsecret"><em>*</em>AppSecret</label></dt>
+                        <dd class="opt">
+                            <input type="text" name="toutiao[appsecret]" id="toutiao_appsecret" value="{$config.applets_config.appsecret}" class="input-txt" autocomplete="off">
+                            <p class="notic">小程序密钥</p>
+                        </dd>
+                    </dl>
+                    <dl class="row"><dt class="tit"><label><b>抖音支付</b></label></dt></dl>
+                    <dl class="row">
+                        <dt class="tit"><label for="toutiao_salt">SALT</label></dt>
+                        <dd class="opt">
+                            <input type="text" name="toutiao[salt]" id="toutiao_salt" value="{$config.applets_config.salt}" class="input-txt" autocomplete="off">
+                            <p class="notic">请在抖音开放平台-【某某小程序】-【能力】-【支付】-【支付方式管理】-【支付设置】中查看支付系统秘钥 SALT</p>
+                        </dd>
+                    </dl>
+                </div>
+                {/eq}
+                
+                <div class="bot mt30">
+                    <a href="JavaScript:void(0);" onclick="saveAppletsConfig();" class="ncap-btn-big ncap-btn-green">确认提交</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var parentObj = parent.layer.getFrameIndex(window.name);
+
+    function saveAppletsConfig() {
+        if (!$('#applets_name').val() || $('#applets_name').val() == '') {
+            showErrorMsg('请填写小程序名称');
+            $('#applets_name').focus();
+            return false;
+        }
+        var value = {$config.applets_type};
+        if (1 === parseInt(value)) {
+            if (!$('#weixin_appid').val() || $('#weixin_appid').val() == '') {
+                showErrorMsg('请填写AppID');
+                $('#weixin_appid').focus();
+                return false;
+            } else if (!$('#weixin_appsecret').val() || $('#weixin_appsecret').val() == '') {
+                showErrorMsg('请填写AppSecret');
+                $('#weixin_appsecret').focus();
+                return false;
+            }
+        }
+        else if (2 === parseInt(value)) {
+            if (!$('#baidu_appid').val() || $('#baidu_appid').val() == '') {
+                showErrorMsg('请填写App ID');
+                $('#baidu_appid').focus();
+                return false;
+            } else if (!$('#baidu_appkey').val() || $('#baidu_appkey').val() == '') {
+                showErrorMsg('请填写App Key');
+                $('#baidu_appkey').focus();
+                return false;
+            } else if (!$('#baidu_appsecret').val() || $('#baidu_appsecret').val() == '') {
+                showErrorMsg('请填写App Secret');
+                $('#baidu_appsecret').focus();
+                return false;
+            }
+        }
+        else if (3 === parseInt(value)) {
+            if (!$('#toutiao_appid').val() || $('#toutiao_appid').val() == '') {
+                showErrorMsg('请填写AppID');
+                $('#toutiao_appid').focus();
+                return false;
+            } else if (!$('#toutiao_appsecret').val() || $('#toutiao_appsecret').val() == '') {
+                showErrorMsg('请填写AppSecret');
+                $('#toutiao_appsecret').focus();
+                return false;
+            }
+        }
+        else {
+            showErrorMsg('请选择小程序类型');
+            return false;
+        }
+
+        layer_loading('正在处理');
+        $.ajax({
+            type: 'post',
+            url : "{:weapp_url('Suibian/Suibian/applets_edit', ['_ajax'=>1])}",
+            data: $('#postForm').serialize(),
+            dataType: 'json',
+            success: function(res) {
+                layer.closeAll();
+                if (1 === parseInt(res.code)) {
+                    var _parent = parent;
+                    _parent.layer.close(parentObj);
+                    _parent.showSuccessMsg(res.msg, 1500, function() {
+                        _parent.window.location.reload();
+                    });
+                } else {
+                    showErrorAlert(res.msg);
+                }
+            },
+            error: function(e) {
+                layer.closeAll();
+                showErrorAlert(e.responseText);
+            }
+        });
+    }
+</script>
+{include file="footer.htm" /}

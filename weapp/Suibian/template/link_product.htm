@@ -1,0 +1,147 @@
+<style type="text/css">
+    .red_imp{
+        color: red!important;
+    }
+</style>
+<div id="link_product" style="margin-top: 10px;">
+    <div class="flexigrid flexigrid-xin" style="position: unset !important;overflow: unset;">
+        <div class="header-bar header-bj">
+            <div class="more">
+                <div class="search">
+                    <div class="content" >
+                        <form id="searchForm" action="{:url('Other/link')}" method="get" onsubmit="layer_loading('正在处理');" style="display: unset;">
+                            {$searchform.hidden|default=''}
+                            <div class="ey-form-item"><label class="users-form-item-label">商品名称：</label>
+                                <div class="users-form-item-content">
+                                    <div class="users-select">
+                                        <div tabindex="0" class="users-select-selection">
+                                            <div class="sDiv2">
+                                                <input type="text" size="50" name="keywords" id="keywords" value="{$Request.param.keywords}" class="qsbox" style="width: 170px;" autocomplete="off" placeholder="输入商品名称搜索...">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="ad_host_id" value="{$ad_host_id|default=3}">
+                        </form>
+                        <div class="ey-form-item" style="margin-left: 20px;">
+                            <div class="users-form-item-content">
+                                <span class="bt-xin" id="submitForm" onclick="productQuery();">查询</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="geduan-xin"></div>
+    <div class="flexigrid flexigrid2">
+        <div class="bDiv" style="height: auto;">
+            <div id="flexigrid" cellpadding="0" cellspacing="0" border="0">
+                {empty name="list"}
+                <table style="width: 100%;">
+                    <thead style="background-color: #f2f2f2; line-height: 40px;">
+                        <tr>
+                            <th abbr="article_title" axis="col3" class="w60"> <div class="tc">商品名称</div> </th>
+                            <th abbr="article_title" axis="col3" class=""> <div class="ml15"></div> </th>
+                            <th abbr="article_title" axis="col3" class="w100">
+                                <div class="tc sort_style">
+                                    <a href="{:getArchivesSortUrl('users_price')}">价格&nbsp;<i {eq name='$Request.param.orderby' value='users_price'}{eq name='$Request.param.orderway' value='asc'}class="asc"{else /}class="desc"{/eq}{/eq}></i></a>
+                                </div>
+                            </th>
+                            <th abbr="article_title" axis="col3" class="w100">
+                                <div class="tc sort_style">
+                                    <a href="{:getArchivesSortUrl('stock_count')}">库存&nbsp;<i {eq name='$Request.param.orderby' value='stock_count'}{eq name='$Request.param.orderway' value='asc'}class="asc"{else /}class="desc"{/eq}{/eq}></i></a>
+                                </div>
+                            </th>
+                            <th axis="article_title" axis="col3" class="w60"> <div class="tc">操作</div> </th>
+                        </tr>
+                    </thead>
+                </table>
+                <div class="no_row">
+                    <div class="no_pic"><img src="__SKIN__/images/null-data.png"></div>
+                </div>
+                {else/}
+                <table style="width: 100%;">
+                    <thead style="background-color: #f2f2f2; line-height: 40px;">
+                        <tr>
+                            <th abbr="article_title" axis="col3" class="w60"> <div class="tc">商品名称</div> </th>
+                            <th abbr="article_title" axis="col3" class=""> <div class="ml15"></div> </th>
+                            <th abbr="article_title" axis="col3" class="w100">
+                                <div class="tc sort_style">
+                                    <a href="{:getArchivesSortUrl('users_price')}">价格&nbsp;<i {eq name='$Request.param.orderby' value='users_price'}{eq name='$Request.param.orderway' value='asc'}class="asc"{else /}class="desc"{/eq}{/eq}></i></a>
+                                </div>
+                            </th>
+                            <th abbr="article_title" axis="col3" class="w100">
+                                <div class="tc sort_style">
+                                    <a href="{:getArchivesSortUrl('stock_count')}">库存&nbsp;<i {eq name='$Request.param.orderby' value='stock_count'}{eq name='$Request.param.orderway' value='asc'}class="asc"{else /}class="desc"{/eq}{/eq}></i></a>
+                                </div>
+                            </th>
+                            <th axis="article_title" axis="col3" class="w60"> <div class="tc">操作</div> </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {foreach name="list" item="vo" key="k" }
+                            <tr>
+                                <td class="w60">
+                                    <div class="tc">
+                                        <img width="50" height="50" src="{$vo.litpic}">
+                                    </div>
+                                </td>
+                                <td class="goods-item">
+                                    <div class="fl">
+                                       <div class="title">
+                                            {$vo.title}
+                                            {notempty name="$vo.label_names"} <br><span class="pro-span">{$vo.label_names}</span> {/notempty}
+                                       </div>
+                                    </div>
+                                </td>
+                                <td class="w100"> <div class="tc">￥{$vo.users_price}</div> </td>
+                                <td class="w100"> <div class="tc" {eq name="$param.query" value="3"}style="color: red;"{/eq}>{$vo.stock_count}</div> </td>
+                                <td align="center" class="operation">
+                                    <div class="tc">
+                                        <a href="javascript:void(0);" data-aid="{$vo.aid}" data-title="{$vo.title_new}" id="a_product_btn_{$vo.aid}" onclick="selectProduct(this);" class="btn blue select_btn">选择</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {/foreach}
+                        </tbody>
+                    </table>
+                    {/empty}
+                </div>
+                <div class="iDiv" style="display: none;"></div>
+            </div>
+            {notempty name="list"}
+            <div class="tDiv">
+                <div class="tDiv2">
+                    {include file="public/page" /}
+                </div>
+                <div style="clear:both"></div>
+            </div>
+            {/notempty}
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        // 表格行点击选中切换
+        $('#flexigrid > table>tbody >tr').click(function() {
+            $(this).toggleClass('trSelected');
+        });
+        $('#a_product_btn_{$ad_link_id}').click();
+    });
+
+    // 商品查询搜索
+    function productQuery() {
+        $('#searchForm').submit();
+    }
+
+    function selectProduct(obj) {
+        $('#link_product a.select_btn').html('选择').removeClass('red_imp').addClass('blue');
+        $(obj).html('已选').removeClass('blue').addClass('red_imp');
+        $('#link_id').val($(obj).attr('data-aid'));
+        $('#host_id').val({$ad_host_id|default=0});
+        $('#link_names').val($(obj).attr('data-title'));
+    }
+</script>

@@ -1,0 +1,145 @@
+{include file="header.htm" /}
+<body class="bodystyle" style="cursor: default; -moz-user-select: inherit; height: calc( 100% - 22px );">
+<div id="append_parent"></div>
+<div id="ajaxwaitid"></div>
+{include file="left" /}
+<div class="page min-hg-c-20" style="min-width:auto;margin-left:100px;padding-bottom: 0;">
+    <div class="flexigrid">
+        <div class="mDiv pt0">
+            <div class="ftitle">
+                <div class="fbutton">
+                        <a href="javascript:void(0);" data-href="{:weapp_url('Suibian/Suibian/addad')}" onclick="openFullframe(this, '新增广告', '100%', '100%');">
+                        <div class="add">
+                            <span><i class="layui-icon layui-icon-addition"></i>添加广告位</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="hDiv">
+            <div class="hDivBox">
+                <table cellspacing="0" cellpadding="0" style="width: 100%">
+                    <thead>
+                    <tr>
+                        <th abbr="article_show" axis="col5" class="w40">
+                            <div class="tc">序号</div>
+                        </th>
+                        <th abbr="ac_id" axis="col4">
+                            <div style="text-align: left; padding-left: 10px;" class="">广告名称</div>
+                        </th>
+                        <th abbr="article_show" axis="col5" class="w160">
+                            <div class="tc">位置</div>
+                        </th>
+                        <th abbr="article_time" axis="col6" class="w100">
+                            <div class="tc">启用</div>
+                        </th>
+                        <th axis="col1" class="w200">
+                            <div class="tc">操作</div>
+                        </th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+        <div class="bDiv" style="height: auto;">
+            <div id="flexigrid" cellpadding="0" cellspacing="0" border="0">
+                <table style="width: 100%">
+                    <tbody>
+                        {empty name="list"}
+                        <tr>
+                            <td class="no-data" align="center" axis="col0" colspan="50">
+                                <div class="no_row">
+                                    <div class="no_pic"><img src="__SKIN__/images/null-data.png"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        {else/}
+                        {foreach name="list" item="vo" key="k" }
+                        <tr>
+                            <td class="sort">
+                                <div class="w40 tc">
+                                    {if condition="$pages->nowPage > 1"}
+                                        {$pages->listRows * ($pages->nowPage-1) + $k+1}
+                                    {else /}
+                                        {$k+1}
+                                    {/if}
+                                </div>
+                            </td>
+                            <td style="width: 100%;">
+                                <div class="tl" style="padding-left: 10px;">{$vo.position_title}</div>
+                            </td>
+                            <td>
+                                <div class="w160 tc">
+                                    {if condition="$vo.system == 1"}
+                                        {if condition="$vo.position_title == '幻灯片' || $vo.position_title == '金刚位'"}首页{else/}分类页{/if}
+                                    {else /}
+                                        自定义
+                                    {/if}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="w100 tc">
+                                    {eq name="$vo.status" value='1'}
+                                    <span class="yes" onClick="changeTableVal('weapp_applets_ad_position', 'position_id', '{$vo.position_id}', 'status', this);"><i class="fa fa-check-circle"></i>是</span>
+                                    {else /}
+                                    <span class="no" onClick="changeTableVal('weapp_applets_ad_position', 'position_id', '{$vo.position_id}', 'status', this);"><i class="fa fa-ban"></i>否</span>
+                                    {/eq}
+                                </div>
+                            </td>
+                            <td class="operation">
+                                <div class="w200 tc">
+                                    <a href="javascript:void(0);" data-href="{:weapp_url('Suibian/Suibian/editad', ['position_id'=>$vo.position_id])}" onclick="openFullframe(this, '编辑{$vo.position_title}', '100%', '100%');" class="btn blue">编辑</a>
+                                    <i></i>
+                                    {eq name="$vo.system" value='1'}
+                                    <a class="btn grey" href="javascript:void(0);">删除</a>
+                                    {else /}
+                                    <a class="btn blue" href="javascript:void(0);" onclick="delad({$vo.position_id});">删除</a>
+                                    {/eq}
+                                </div>
+                            </td>
+                        </tr>
+                        {/foreach}
+                        {/empty}
+                    </tbody>
+                </table>
+            </div>
+            <div class="iDiv" style="display: none;"></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        // 表格行点击选中切换
+        $('#flexigrid > table>tbody >tr').click(function(){
+            $(this).toggleClass('trSelected');
+        });
+    });
+
+    function delad(position_id) {
+        showConfirm('确认删除此广告位？', {}, function() {
+            layer_loading('正在处理');
+            $.ajax({
+                url : "{:weapp_url('Suibian/Suibian/delad')}",
+                data: {position_id: position_id, _ajax: 1},
+                type: 'post',
+                dataType: 'json',
+                success: function(res) {
+                    layer.closeAll();
+                    if (1 === parseInt(res.code)) {
+                        showSuccessMsg(res.msg, 1500, function() {
+                            window.location.reload();
+                        });
+                    } else {
+                        showErrorAlert(res.msg);
+                    }
+                },
+                error: function(e) {
+                    layer.closeAll();
+                    showErrorAlert(e.responseText);
+                }
+            });
+        });
+    }
+</script>
+{include file="footer.htm" /}

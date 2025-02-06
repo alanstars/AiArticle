@@ -1,0 +1,241 @@
+{include file="header.htm" /}
+<script type="text/javascript" src="__WEAPP_TEMPLATE__/skin/js/jquery.bigcolorpicker.min.js?v={$weappInfo.version|default='v1.0.0'}"></script>
+<link type="text/css" href="__WEAPP_TEMPLATE__/skin/css/jquery.bigcolorpicker.css?v={$weappInfo.version|default='v1.0.0'}" rel="stylesheet" />
+<script type="text/javascript">
+$(function(){
+	$("#bjs").bigColorpicker("bjs");
+	$("#tbys").bigColorpicker("tbys");
+	$("#ztys").bigColorpicker("ztys");
+	$("#img").bigColorpicker(function(el,color){
+		$(el).css("background-color",color);
+	});
+	$(".ku").bigColorpicker(function(el,color){
+		$(el).css("background-color",color);
+	});
+	$("#c5").bigColorpicker("c5","L",6);
+});
+</script>
+<style>.explanation ul li span {width: 200px;display: inline-block;}.explanation ul li {border-bottom: 1px solid #ffffff;}</style>
+<body style="background-color: #FFF; overflow: auto;">
+<div id="toolTipLayer" style="position: absolute; z-index: 9999; display: none; visibility: visible; left: 95px; top: 573px;"></div>
+<div id="append_parent"></div>
+<div id="ajaxwaitid"></div>
+<div class="page">
+    {include file="bar.htm" /}
+	<!-- 操作说明 -->
+    <div id="explanation" class="explanation" style="color: rgb(44, 188, 163); background-color: rgb(237, 251, 248); width: 99%; height: 100%;">
+        <div id="checkZoom" class="title"><i class="fa fa-lightbulb-o"></i>
+            <h4 title="提示相关设置操作时应注意的要点">操作提示</h4>
+            <span title="收起提示" id="explanationZoom" style="display: block;"></span>
+        </div>
+        <ul>
+            <li><span>栏目名称1：电话</span><span>图标：fa-phone</span>地址：tel:15366******</li>
+			<li><span>栏目名称2：短信</span><span>图标：fa-comments</span>地址：sms:15366******</li>
+			<li><span>栏目名称3：会员中心或者我的</span><span>图标：fa-user</span>地址：{literal}{eyou:url link='user/Users/index' /}{/literal}</li>
+			<li><span>栏目名称4：QQ</span><span>图标：fa-qq</span>地址：http://wpa.qq.com/msgrd?v=3&uin=QQ号码&site=qq&menu=yes</li>
+			<li><span>栏目名称5：首页</span><span>图标：fa-home</span>地址：/</li>
+			<li><span>栏目名称6：微信</span><span>图标：fa-wechat</span>地址：javascript:;</li>
+			<li>其他栏目以及地址根据实际信息来填写！图标查看字体大全！</li>
+			<li style="color: #f00;">注意事项：样式一当中 栏目二和栏目四可以不填，样式二当中 至少填写2个栏目，不填则不显示，如果需要微信请在栏目五填写！请仔细阅读！！！</li>
+        </ul>
+    </div>
+    <form class="form-horizontal" id="post_form" action="{:weapp_url('Footernav/Footernav/save')}" method="post">
+        <div class="ncap-form-default">
+		    <div class="xgtu1 none" {if condition="!isset($info.data.yangshi) || $info.data.yangshi eq 1"}style="display: block;"{/if}>
+			    <dl class="row">
+                    <dt class="tit">
+                        <label>效果图1</label>
+                    </dt>
+                    <dd class="opt">
+                        <div class="onoff" style="height: 90px;">
+                           <img class="onoff" src="__WEAPP_TEMPLATE__/skin/images/xgtu1.jpg" />
+                        </div>
+                        <p class=""></p>
+                    </dd>
+                </dl>
+		    </div>
+		    <div class="xgtu2 none" {if condition="isset($info.data.yangshi) && $info.data.yangshi eq 2"}style="display: block;"{/if}>
+			    <dl class="row">
+                    <dt class="tit">
+                        <label>效果图2</label>
+                    </dt>
+                    <dd class="opt">
+                        <div class="onoff" style="height: 90px;">
+                           <img class="onoff" src="__WEAPP_TEMPLATE__/skin/images/xgtu2.jpg" />
+                        </div>
+                        <p class=""></p>
+                    </dd>
+                </dl>
+		    </div>
+			<dl class="row">
+                <dt class="tit">
+                    <label>调用方式</label>
+                </dt>
+                <dd class="opt">
+                    <div class="onoff">
+                        <label for="tag_weapp1" class="cb-enable {if condition='!isset($row.tag_weapp) || $row.tag_weapp eq 1'}selected{/if}">系统自动</label>
+                        <label for="tag_weapp0" class="cb-disable {if condition='isset($row.tag_weapp) && $row.tag_weapp eq 2'}selected{/if}">手工调用</label>
+                        <input id="tag_weapp1" name="tag_weapp" value="1" type="radio" {if condition="!isset($row.tag_weapp) || $row.tag_weapp eq 1"} checked="checked"{/if}>
+                        <input id="tag_weapp0" name="tag_weapp" value="2" type="radio" {if condition="isset($row.tag_weapp) && $row.tag_weapp eq 2"} checked="checked"{/if}>
+                    </div>
+                    <p class="notic">自动调用会默认绑定weapp模板标签，手工调用请参考使用指南的调用方法。</p>
+                </dd>
+            </dl>
+            <dl class="row">
+                <dt class="tit">
+                    <label>样式选择</label>
+                </dt>
+                <dd class="opt">
+                    <div class="onoff">
+                        <label for="yangshi1" class="cb-enable cb-enable1 {if condition='!isset($info.data.yangshi) || $info.data.yangshi eq 1'}selected{/if}">样式一</label>
+                        <label for="yangshi2" class="cb-disable cb-enable2 {if condition='isset($info.data.yangshi) && $info.data.yangshi eq 2'}selected{/if}">样式二</label>
+                        <input id="yangshi1" name="yangshi" value="1" type="radio" {if condition="!isset($info.data.yangshi) || $info.data.yangshi eq 1"} checked="checked"{/if}>
+                        <input id="yangshi2" name="yangshi" value="2" type="radio" {if condition="isset($info.data.yangshi) && $info.data.yangshi eq 2"} checked="checked"{/if}>
+                    </div>
+                    <p class=""></p>
+                </dd>
+            </dl>
+			<dl class="row">
+                <dt class="tit">
+                    <label>调用JQ</label>
+                </dt>
+                <dd class="opt">
+                    <div class="onoff">
+                        <label for="jq1" class="cb-enable {if condition='!isset($info.data.jq) || $info.data.jq eq 1'}selected{/if}">调用</label>
+                        <label for="jq0" class="cb-disable {if condition='isset($info.data.jq) && $info.data.jq eq 2'}selected{/if}">关闭</label>
+                        <input id="jq1" name="jq" value="1" type="radio" {if condition="!isset($info.data.jq) || $info.data.jq eq 1"} checked="checked"{/if}>
+                        <input id="jq0" name="jq" value="2" type="radio" {if condition="isset($info.data.jq) && $info.data.jq eq 2"} checked="checked"{/if}>
+                    </div>
+                    <p class="notic">自动调用会默认绑定weapp模板标签，手工调用请参考使用指南的调用方法。</p>
+                </dd>
+            </dl>
+			<dl class="row">
+                <dt class="tit">
+                    <label>背景色</label>
+                </dt>
+                <dd class="opt">
+                    <input type="text" name="bjs" value="{$info.data.bjs|default='#fff'}" id="bjs" class="input-txt" autocomplete="off">
+                    <span class="err"></span>
+                    <p class=""></p>
+                </dd>
+            </dl>
+			<dl class="row">
+                <dt class="tit">
+                    <label>图标颜色</label>
+                </dt>
+                <dd class="opt">
+                    <input type="text" name="tbys" value="{$info.data.tbys|default='#2b2b2b'}" id="tbys" class="input-txt" autocomplete="off">
+                    <span class="err"></span>
+                    <p class=""></p>
+                </dd>
+            </dl>
+			<dl class="row">
+                <dt class="tit">
+                    <label>字体颜色</label>
+                </dt>
+                <dd class="opt">
+                    <input type="text" name="ztys" value="{$info.data.ztys|default='#333333'}" id="ztys" class="input-txt" autocomplete="off">
+                    <span class="err"></span>
+                    <p class=""></p>
+                </dd>
+            </dl>
+			<dl class="row bankcon none" {if condition="!isset($info.data.yangshi) || $info.data.yangshi eq 1"}style="display: block;"{/if}>
+                <dt class="tit">
+                    <label>中间图标大小</label>
+                </dt>
+                <dd class="opt">
+                    <input type="text" name="zjtbdx" value="{$info.data.zjtbdx|default='40'}" id="zjtbdx" class="input-txt" autocomplete="off">px <em style="color: #f00;">*此选项为样式一设置，建议填写40或者60像素</em>
+                    <span class="err"></span>
+                    <p class=""></p>
+                </dd>
+            </dl>
+                <dl class="row">
+                    <dt class="tit">
+                        <label>栏目一</label>
+                    </dt>
+                    <dd class="opt">
+                        <span>名称：</span><input type="text" name="mclmyi" value="{$info.data.mclmyi|default='电话'}" id="mclmyi" class="input-txt" autocomplete="off">
+						<span>图标：</span><input type="text" name="tblmyi" value="{$info.data.tblmyi|default='fa-phone'}" id="tblmyi" class="input-txt" autocomplete="off">
+						<span>地址：</span><input type="text" name="dzlmyi" value="{$info.data.dzlmyi|default='tel:15366******'}" id="dzlmyi" class="input-txt" autocomplete="off">
+                        <span class="err"></span>
+                        <p class=""></p>
+                    </dd>
+                </dl> 
+                <dl class="row">
+                    <dt class="tit">
+                        <label>栏目二</label>
+                    </dt>
+                    <dd class="opt">
+                        <span>名称：</span><input type="text" name="mclmer" value="{$info.data.mclmer|default='短信'}" id="mclmer" class="input-txt" autocomplete="off">
+						<span>图标：</span><input type="text" name="tblmer" value="{$info.data.tblmer|default='fa-comments'}" id="tblmer" class="input-txt" autocomplete="off">
+						<span>地址：</span><input type="text" name="dzlmer" value="{$info.data.dzlmer|default='sms:15366******'}" id="dzlmer" class="input-txt" autocomplete="off">
+                        <span class="err"></span>
+                        <p class=""></p>
+                    </dd>
+                </dl>
+                <dl class="row">
+                    <dt class="tit">
+                        <label>栏目三</label>
+                    </dt>
+                    <dd class="opt">
+                        <span>名称：</span><input type="text" name="mclmsan" value="{$info.data.mclmsan|default='首页'}" id="mclmsan" class="input-txt" autocomplete="off">
+						<span>图标：</span><input type="text" name="tblmsan" value="{$info.data.tblmsan|default='fa-home'}" id="tblmsan" class="input-txt" autocomplete="off">
+						<span>地址：</span><input type="text" name="dzlmsan" value="{$info.data.dzlmsan|default='/'}" id="dzlmsan" class="input-txt" autocomplete="off">
+                        <span class="err"></span>
+                        <p class=""></p>
+                    </dd>
+                </dl>
+                <dl class="row">
+                    <dt class="tit">
+                        <label>栏目四</label>
+                    </dt>
+                    <dd class="opt">
+                        <span>名称：</span><input type="text" name="mclmsi" value="{$info.data.mclmsi|default='QQ'}" id="mclmsi" class="input-txt" autocomplete="off">
+						<span>图标：</span><input type="text" name="tblmsi" value="{$info.data.tblmsi|default='fa-qq'}" id="tblmsi" class="input-txt" autocomplete="off">
+						<span>地址：</span><input type="text" name="dzlmsi" value="{$info.data.dzlmsi|default=''}" id="dzlmsi" class="input-txt" autocomplete="off">
+                        <span class="err"></span>
+                        <p class=""></p>
+                    </dd>
+                </dl>
+                <dl class="row">
+                    <dt class="tit">
+                        <label>栏目五</label>
+                    </dt>
+                    <dd class="opt">
+                        <span>名称：</span><input type="text" name="mclmwu" value="{$info.data.mclmwu|default='微信'}" id="mclmwu" class="input-txt" autocomplete="off">
+						<span>图标：</span><input type="text" name="tblmwu" value="{$info.data.tblmwu|default='fa-wechat'}" id="tblmwu" class="input-txt" autocomplete="off">
+						<span>地址：</span><input type="text" name="dzlmwu" value="{$info.data.dzlmwu|default='javascript:;'}" id="dzlmwu" class="input-txt" autocomplete="off">
+                        <span class="err"></span>
+                        <p class=""></p>
+                    </dd>
+                </dl>
+				{eyou:switch name='$info.data.mclmwu'}
+				{eyou:case value='微信'}
+				<dl class="row">
+                    <dt class="tit">
+                        <label>微信号</label>
+                    </dt>
+                    <dd class="opt">
+                        <input type="text" name="wxhlmwu" value="{$info.data.wxhlmwu|default='408256272'}" id="wxhlmwu" class="input-txt" autocomplete="off">
+                        <span class="err"></span>
+                        <p class=""></p>
+                    </dd>
+                </dl>
+				{/eyou:case}
+				{eyou:default /}
+				{/eyou:switch}
+            <div class="bot">
+                <input type="hidden" name="code" value="{$row.code}" />
+                <a href="JavaScript:void(0);" onclick="checkForm();" class="ncap-btn-big ncap-btn-green" id="submitBtn">确认提交</a>
+            </div>
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+    // 判断输入框是否为空
+    function checkForm(){
+        layer_loading('正在处理');
+        $('#post_form').submit();
+    }
+</script>
+{include file="footer.htm" /}
