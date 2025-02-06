@@ -17,7 +17,7 @@ return array(
     'version' => 'v1.0.0', // 插件版本号
     'min_version' => 'v1.7.0', // CMS最低版本支持
     'author' => '学乎者也', // 开发者
-    'description' => 'Ai 自动生成文章，定时自动更新，支持多语言', // 插件描述
+    'description' => 'Ai 自动生成文章，定时自动更新，支持多语言1', // 插件描述
     'litpic'    => '/weapp/AiArticle/logo.png',
     'scene' => '0',  // 使用场景 0 PC+手机 1 手机 2 PC
     'subroot' => 'on',

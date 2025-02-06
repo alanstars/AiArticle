@@ -39,7 +39,7 @@ CREATE TABLE `#@__weapp_ai_article` (
   `publish_count` INT(11) DEFAULT 1 COMMENT '每次发布的文章数量，默认为 1',
   `created_time` INT(11) NOT NULL COMMENT '创建时间',
   `updated_time` INT(11) NOT NULL COMMENT '更新时间',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`) AUTO_INCREMENT=1
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='AI文章生成配置表';
 
 -- ----------------------------------
@@ -63,7 +63,7 @@ CREATE TABLE `#@__weapp_ai_article_conf` (
   `translate_config_key` VARCHAR(255) DEFAULT NULL COMMENT '翻译配置Key',
   `created_time` INT(11) NOT NULL COMMENT '创建时间',
   `updated_time` INT(11) NOT NULL COMMENT '更新时间',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`) AUTO_INCREMENT=1
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='插件全局配置参数表';
 
 -- ----------------------------
@@ -98,6 +98,6 @@ CREATE TABLE `#@__weapp_ai_article_lists` (
   `publish_time` INT(11) DEFAULT NULL COMMENT '发布时间',
   `created_time` INT(11) NOT NULL COMMENT '创建时间',
   `updated_time` INT(11) NOT NULL COMMENT '更新时间',
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`) AUTO_INCREMENT=1,
   FOREIGN KEY (`config_id`) REFERENCES `#@__weapp_ai_article`(`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='AI文章列表';
