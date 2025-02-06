@@ -137,9 +137,12 @@ class AiArticle extends Weapp
 
         //获取eyoucms中为文章模型的所有的栏目列表
         $articleTypeList = Db::name('arctype')->field('id,parent_id,topid,typename,lang')->where('channeltype=1')->select();
+        // dump($articleTypeList);
         $tree = $this->buildTree($articleTypeList,0);
+        // dump($tree);
         //生成 HTML 格式的 select option 列表
         $tree = $this->selectTree($tree);
+        dump($tree);
         $this->assign('articleTypeList', $tree);
         //获取eyoucms中为文章模型的所有的栏目列表结束
 
@@ -260,45 +263,50 @@ class AiArticle extends Weapp
     }
 
     
-        /**
-     * Convert a flat list of categories into a tree structure.
+   /**
+     * 把一维数组生成带有层级关系的多维数组，需要加入层级关系的字段名
+     * 
      *
      * @param array $elements The flat list of categories.
      * @param int $parentId The parent ID to start building the tree from.
      * @return array The tree structure of categories.
      */
-    private function buildTree(array $elements, $parentId = 0,$level = 0) {
-        $branch = array();
-        
+    private function buildTree($elements, $parentId = 0, $level = 0) {
+        $tree = array();
         foreach ($elements as $element) {
             if ($element['parent_id'] == $parentId) {
                 $element['level'] = $level;
-                $level++;
-                $children = $this->buildTree($elements, $element['id'],$level);
+                $children = $this->buildTree($elements, $element['id'], $level + 1);
                 if ($children) {
                     $element['children'] = $children;
-                    $element['level'] = $level;
-                }
-                $branch[] = $element;
-            }
-        }
 
-        return $branch;
+                }
+                $tree[] = $element;
+            }
+        } 
+        return $tree;
     }
+
     /**
-     * 把多维数组生成带有层级关系的HTML格式的select option列表
+     * 把带有层级关系的多维数组，生成 HTML 格式的 select option 列表
+     *
      *
      * @param array $tree 多维数组
+     *
      * @param int $level 层级
      *
      **/
     private function selectTree($tree, $level = 0) {
         $html = '';
-        $nbsp = str_repeat('&nbsp;&nbsp;--', $level);
+        $nbsp = str_repeat('&nbsp;', $level * 4);
         foreach ($tree as $node) {
-            $html .= '<option value="' . $node['id'] . '">' . $nbsp . '>'.$node['typename'] . '</option>'; 
+            $html .= '<option value="' . $node['id'] . '">' . $nbsp .$node['typename'] . '</option>'; 
+            if (!empty($node['children'])) {
+                $html.= $this->selectTree($node['children'], $level + 1);
+            }
         } 
         return $html;
     }
+
 
 }

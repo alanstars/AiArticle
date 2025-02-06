@@ -55,7 +55,9 @@
                     <label for="bind_column_id">绑定栏目 ID</label>
                 </dt>
                 <dd class="opt">
-                    <input type="text" name="bind_column_id" value="" id="bind_column_id" class="input-txt">
+                    <select name="bind_column_id" id="bind_column_id" class="input-txt">
+                        {$articleTypeList}
+                    </select>
                     <span class="err"></span>
                     <p class="notic"></p>
                 </dd>

@@ -27,84 +27,39 @@ return array (
     'primary' => false,
     'autoinc' => false,
   ),
-  'article_theme' => 
+  'ai_config_key' => 
   array (
-    'name' => 'article_theme',
+    'name' => 'ai_config_key',
     'type' => 'varchar(255)',
     'notnull' => false,
     'default' => NULL,
     'primary' => false,
     'autoinc' => false,
   ),
-  'seo_parameters' => 
+  'translate_model_name' => 
   array (
-    'name' => 'seo_parameters',
-    'type' => 'text',
+    'name' => 'translate_model_name',
+    'type' => 'varchar(100)',
     'notnull' => false,
     'default' => NULL,
     'primary' => false,
     'autoinc' => false,
   ),
-  'article_language' => 
+  'translate_model_identifier' => 
   array (
-    'name' => 'article_language',
-    'type' => 'varchar(50)',
-    'notnull' => false,
-    'default' => 'zh',
-    'primary' => false,
-    'autoinc' => false,
-  ),
-  'article_count' => 
-  array (
-    'name' => 'article_count',
-    'type' => 'int(11)',
-    'notnull' => false,
-    'default' => '1',
-    'primary' => false,
-    'autoinc' => false,
-  ),
-  'bind_column_id' => 
-  array (
-    'name' => 'bind_column_id',
-    'type' => 'int(11)',
+    'name' => 'translate_model_identifier',
+    'type' => 'varchar(100)',
     'notnull' => false,
     'default' => NULL,
     'primary' => false,
     'autoinc' => false,
   ),
-  'bind_column_id_lang' => 
+  'translate_config_key' => 
   array (
-    'name' => 'bind_column_id_lang',
-    'type' => 'varchar(20)',
+    'name' => 'translate_config_key',
+    'type' => 'varchar(255)',
     'notnull' => false,
     'default' => NULL,
-    'primary' => false,
-    'autoinc' => false,
-  ),
-  'is_translate' => 
-  array (
-    'name' => 'is_translate',
-    'type' => 'tinyint(1)',
-    'notnull' => false,
-    'default' => '0',
-    'primary' => false,
-    'autoinc' => false,
-  ),
-  'publish_schedule' => 
-  array (
-    'name' => 'publish_schedule',
-    'type' => 'text',
-    'notnull' => false,
-    'default' => NULL,
-    'primary' => false,
-    'autoinc' => false,
-  ),
-  'publish_count' => 
-  array (
-    'name' => 'publish_count',
-    'type' => 'int(11)',
-    'notnull' => false,
-    'default' => '1',
     'primary' => false,
     'autoinc' => false,
   ),

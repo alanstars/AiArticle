@@ -31,16 +31,14 @@ CREATE TABLE `#@__weapp_ai_article` (
   `article_language` VARCHAR(50) DEFAULT 'zh' COMMENT '文章语言',
   `article_count` INT(11) DEFAULT 1 COMMENT '生成文章数量',
   `bind_column_id` INT(11) DEFAULT NULL COMMENT '要绑定的栏目ID',
-  --如果多语言，需绑定其他语言对应栏目 ID
   `bind_column_id_lang` VARCHAR(20) DEFAULT NULL COMMENT '绑定的中文栏目ID,逗号或者序列化格式:ID-语言标识',
-  --是否翻译并发布到其他语言
   `is_translate` TINYINT(1) DEFAULT 0 COMMENT '是否翻译并发布到其他语言',
   `publish_schedule` TEXT DEFAULT NULL COMMENT '定时发布规则（序列化格式）',
   `publish_count` INT(11) DEFAULT 1 COMMENT '每次发布的文章数量，默认为 1',
   `created_time` INT(11) NOT NULL COMMENT '创建时间',
   `updated_time` INT(11) NOT NULL COMMENT '更新时间',
-  PRIMARY KEY (`id`) AUTO_INCREMENT=1
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='AI文章生成配置表';
+  PRIMARY KEY (`id`) 
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='AI文章生成配置表';
 
 -- ----------------------------------
 -- Table structure for #@__weapp_ai_article_conf
@@ -63,8 +61,8 @@ CREATE TABLE `#@__weapp_ai_article_conf` (
   `translate_config_key` VARCHAR(255) DEFAULT NULL COMMENT '翻译配置Key',
   `created_time` INT(11) NOT NULL COMMENT '创建时间',
   `updated_time` INT(11) NOT NULL COMMENT '更新时间',
-  PRIMARY KEY (`id`) AUTO_INCREMENT=1
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='插件全局配置参数表';
+  PRIMARY KEY (`id`) 
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='插件全局配置参数表';
 
 -- ----------------------------
 -- Records of #@__weapp_ai_article_lists
@@ -98,6 +96,5 @@ CREATE TABLE `#@__weapp_ai_article_lists` (
   `publish_time` INT(11) DEFAULT NULL COMMENT '发布时间',
   `created_time` INT(11) NOT NULL COMMENT '创建时间',
   `updated_time` INT(11) NOT NULL COMMENT '更新时间',
-  PRIMARY KEY (`id`) AUTO_INCREMENT=1,
-  FOREIGN KEY (`config_id`) REFERENCES `#@__weapp_ai_article`(`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='AI文章列表';
+  PRIMARY KEY (`id`) 
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='AI文章列表';
