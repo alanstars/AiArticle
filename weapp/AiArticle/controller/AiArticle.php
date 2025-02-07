@@ -52,15 +52,10 @@ class AiArticle extends Weapp
         $this->db = Db::name('WeappAiArticle');
         $this->conf = Db::name('WeappAiArticleConf');
 
-
-
+        /*获取当前系统是否为多语言*/
         $this->langSwitchOn = false;
-        $langnum_file = DATA_PATH . 'conf' . DS . 'lang_enable_num.txt';
-        if (file_exists($langnum_file)) {
-            $langnum = @file_get_contents($langnum_file);
-            if (!empty($langnum) && 1 < $langnum) {
-                $this->langSwitchOn = true;
-            }
+        if (is_language()) {
+            $this->langSwitchOn = true;
         }
         /*--end*/
         /* 获取当前多语言状态 */
@@ -124,7 +119,6 @@ class AiArticle extends Weapp
      */
     public function add()
     {
-        $lang = $this->lang;
         if (IS_POST) {
             $post = input('post.');
             /*组装存储数据*/
