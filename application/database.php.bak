@@ -17,11 +17,11 @@ return array(
     // 服务器地址
     'hostname'        => '127.0.0.1',
     // 数据库名
-    'database'        => 't_com',
+    'database'        => 't_yesawning_com',
     // 用户名
-    'username'        => 't_com',
+    'username'        => 't_yesawning_com',
     // 密码
-    'password'        => '123456',
+    'password'        => '5w18xQk8hyRJKeDA',
     // 端口
     'hostport'        => '3306',
     // 连接dsn
