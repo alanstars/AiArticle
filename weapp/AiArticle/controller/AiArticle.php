@@ -16,6 +16,7 @@ namespace weapp\AiArticle\controller;
 use think\Page;
 use think\Db;
 use app\common\controller\Weapp;
+use weapp\AiArticle\logic\AiArticleLogic;
 use weapp\AiArticle\model\AiArticleModel;
 
 /**
@@ -95,6 +96,15 @@ class AiArticle extends Weapp
      */
     public function index()
     {
+        echo 111;
+        
+        $message = request()->get('msg');
+        // $message = '我需要你帮我写5篇关于遮阳篷的文章，字数在400字左右';
+        $response = $ai->getMessage($message);
+        dump($response);
+        // echo $response;
+        exit;
+
         $list = array();
         $keywords = input('keywords/s');
 
@@ -137,7 +147,6 @@ class AiArticle extends Weapp
             }
             exit;
         }
-
 
         $conf = M('weapp_ai_article_conf')->find();
         if (empty($conf)) {
