@@ -35,6 +35,7 @@ class AiArticle extends Weapp
     private $db;
     private $lang;
     private $conf;
+    private $articleConf;
     private $articleLists;
     private $langSwitchOn;
 
@@ -58,6 +59,10 @@ class AiArticle extends Weapp
         if (is_language()) {
             $this->langSwitchOn = true;
         }
+
+        //获取当前插件的用户配置信息
+        $this->getArticleConf();
+
         /*--end*/
         /* 获取当前多语言状态 */
         $this->assign('langSwitchOn', $this->langSwitchOn);
@@ -96,14 +101,15 @@ class AiArticle extends Weapp
      */
     public function index()
     {
-        echo 111;
-        
-        $message = request()->get('msg');
-        // $message = '我需要你帮我写5篇关于遮阳篷的文章，字数在400字左右';
-        $response = $ai->getMessage($message);
-        dump($response);
-        // echo $response;
-        exit;
+        // echo 1111;
+
+        // $message = request()->get('msg');
+        // $ai =  new AiArticleLogic('sk-39bf65b467d84be0bc1b262432868ad8','DeepSeek','');
+        // $message = '我需要你帮我写2篇关于遮阳篷的文章，字数在400字左右';
+        // $response = $ai->getMessage($message);
+        // dump($response);
+        // // echo $response;
+        // exit;
 
         $list = array();
         $keywords = input('keywords/s');
@@ -123,9 +129,33 @@ class AiArticle extends Weapp
 
         return $this->fetch('index');
     }
+    /**
+     * 插件后台管理 - 新增生成文章记录表
+     */
+    public function addArticle()
+    {
+        $tId = input('id/s');
+        $aiConfig = cache('articleConf');
+        $articleData = $this->db->where('id', $tId)->find();
+        $ai =  new AiArticleLogic($aiConfig['ai_config_key'],$aiConfig['ai_model_identifier']);
+    
+        $response = $ai->getMessage($articleData['article_theme']);
+        if ($response['code'] == 200) {
+            $data = $response['data'];
+            // $articleData['title'] = $data['title'];
+            // $articleData['content'] = $data['content'];
+            // $articleData['keywords'] = data['keywords'];
+            // $articleData['description'] = $data['description'];
+            
+        }
+        // dump($articleData);
+        dump($response);
+
+
+    }
 
     /**
-     * 插件后台管理 - 新增
+     * 插件后台管理 - 新增文章发布规则
      */
     public function add()
     {
@@ -177,7 +207,7 @@ class AiArticle extends Weapp
     }
 
     /**
-     * 插件后台管理 - 编辑
+     * 插件后台管理 - 编辑文章发布规则
      */
     public function edit()
     {
@@ -242,7 +272,7 @@ class AiArticle extends Weapp
     }
 
     /**
-     * 删除文档
+     * 删除文档文章发布规则
      */
     public function del()
     {
@@ -281,12 +311,19 @@ class AiArticle extends Weapp
             if ($r) {
                 \think\Cache::clear('hooks');
                 adminLog($text . $this->weappInfo['name'] . '：插件配置'); // 写入操作日志å
+                $articleConf = M('weapp_ai_article_conf')->find();
+                $this->articleConf = $articleConf;
+                cache('articleConf', $articleConf);
+
                 $this->success("操作成功!", weapp_url('AiArticle/AiArticle/conf'));
             }
             $this->error("操作失败!");
         }
 
         $row = M('weapp_ai_article_conf')->find();
+        $this->articleConf = $row;
+        cache('articleConf', $row);
+
         $this->assign('row', $row);
         return $this->fetch('conf');
     }
@@ -337,6 +374,23 @@ class AiArticle extends Weapp
             }
         }
         return $html;
+    }
+
+    /**
+     * 获取当前插件的用户配置信息
+     */
+    private function getArticleConf()
+    {
+        $articleCache = cache('articleConf');
+        if (empty($articleCache)) {
+            $articleConf = M('weapp_ai_article_conf')->find();
+            if (!empty($articleConf)) {
+                $this->articleConf = $articleConf;
+                cache('articleConf', $articleConf);
+            }
+        } else {
+            $this->articleConf = $articleCache;
+        }
     }
 
 

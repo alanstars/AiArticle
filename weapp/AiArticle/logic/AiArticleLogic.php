@@ -33,14 +33,20 @@ class AiArticleLogic
      * @param string $ChatModel 调用AI 的具体模型
      * @param string $apiKey API 密钥
      */
-    public function __construct($AiModel, $ChatModel, $apiKey)
+    public function __construct($apiKey,$AiModel, $ChatModel='')
     {
+        if (empty($apiKey) || empty($AiModel)) {
+            return "Error: API key and AI model are required.";
+        }
         $this->AiModel = $AiModel;
         $this->ChatModel = $ChatModel;
         $this->apiKey = $apiKey;
     }
     function getMessage($message)
     {
+        if(empty($message)){
+            return "Error: Message cannot be empty."; 
+        }
         switch ($this->AiModel) {
             case 'OpenAI':
                 return $this->chatWithOpenAI($message);
@@ -82,14 +88,14 @@ class AiArticleLogic
             'messages' => [
                 [
                     'role' => 'system',
-                    'content' => '你是一位经验丰富的 SEO 专家，擅长撰写符合 Google 搜索引擎搜索习惯的文章，以提高文章在 Google 上的收录率和排名。请遵循以下准则撰写文章：
-1. 文章内容要围绕用户提供的主题展开，具有深度和专业性，为读者提供有价值的信息。
-2. 使用自然、流畅的语言，避免堆砌关键词，但要合理地分布相关关键词，以提高文章的相关性。
-3. 文章结构清晰，包含引言、正文和结论，每个部分都要有明确的主题。
-4. 采用适当的标题标签（如 H1、H2、H3 等）来组织文章，增强可读性和搜索引擎友好性。
-5. 文章长度应根据主题的复杂性和深度来确定，一般不少于 800 字，以提供足够的内容供搜索引擎索引。
-6. 注意语法和拼写错误，保证文章的质量。
-7. 请严格按照文章格式生成，格式为：【标题开始】(标题)【标题结束】，然后换行，【关键词开始】（SEO关键词，多个使用半角逗号隔开）【关键词结束】，[SEO描述开始]（SEO描述，字数在100字左右）【SEO描述结束】，然后换行，[正文开始]（正文内容）【正文结束】.其中正文使用 HTML 格式，如：<p>正文内容</p>。如果有生成多篇文章，需再最开头加上【多篇文章】,再每一篇的开头加上【第几篇开始】，结尾加上【第几篇结束】。'
+                    'content' => '你是一位经验丰富的 SEO 专家，专精于撰写契合 Google 搜索引擎搜索偏好的文章，以此显著提升文章在 Google 上的收录率与排名。请严格遵循以下准则进行文章创作：
+1. 文章需紧密围绕用户给定的主题深入展开，具备足够的深度与专业性，为读者提供极具价值的信息。
+2. 运用自然、流畅且生动的语言进行表达，坚决避免关键词堆砌现象，同时要合理分布相关关键词，确保文章相关性的提升。
+3. 文章结构务必清晰明了，由引言、正文(符合第4条要求)和结论三部分构成，且每个部分都要有明确的主题和核心观点。
+4. 采用合适的 HTML 标题标签（如 H1、H2、H3、p、b等）来组织文章内容，增强文章的可读性和搜索引擎友好性。
+5. 文章长度应依据主题的复杂程度和深度灵活确定，一般情况下不少于 800 字，以便为搜索引擎提供充足的内容进行索引。
+6. 高度重视语法和拼写错误，通过仔细校对保证文章质量达到较高水准。
+7. 严格按照规定的文章格式生成内容，格式为：【标题开始】(标题)【标题结束】，换行后，【关键词开始】（SEO关键词，多个关键词使用半角逗号隔开）【关键词结束】，【SEO描述开始】（SEO 描述，字数控制在 100 字左右）【SEO描述结束】，再次换行后，【正文开始】（正文内容）【正文结束】。若生成多篇文章，需在最开头添加【多篇文章】，并在每一篇文章的开头加上【第几篇开始】，结尾加上【第几篇结束】。'
                 ],
                 ['role' => 'user', 'content' => $message],
             ],
@@ -128,14 +134,18 @@ class AiArticleLogic
         $responseData = json_decode($response, true);
         // return $responseData;
         // 检查响应是否有效
+        if(empty($responseData)){
+            return ['code'=>4004,'data'=>[],'msg'=>'Error: Unable to get a valid response from DeepSeek.Key:'. $this->apiKey. "；ChatModel:". $this->ChatModel. "；AiModel:". $this->AiModel. ""];
+        }
         if (isset($responseData['choices'][0]['message']['content'])) {
             $articleContent = $responseData['choices'][0]['message']['content'];
             $result = $this->cleanData($articleContent);
             // return $articleContent;
-            return $result;
+            return ['code'=>200,'data'=>$result,'msg'=>'success'];
         } else {
             // 打印错误信息
-            return "Error: Unable to get a valid response from DeepSeek.Key:" . $this->apiKey . "Model:" . $this->ChatModel . "AiModel:" . $this->AiModel . "";
+            // dump($responseData);
+            return ['code'=>$responseData['error']['code'],'data'=>$responseData,'msg'=>$responseData['error']['message']];
         }
     }
 
@@ -252,14 +262,14 @@ class AiArticleLogic
     }
     
     //清洗数据
-    function cleanData($articleContent)
+    public function cleanData($articleContent)
     {
         $result = [];
         if (strpos($articleContent, '【多篇文章】') !== false) {
             // 去除 【多篇文章】 标记
             $articleContent = str_replace('【多篇文章】', '', $articleContent);
             // 匹配所有文章
-            $pattern = '/【第(\d+)篇开始】.*?【标题开始】(.*?)【标题结束】.*?【关键词开始】(.*?)【关键词结束】.*?【SEO描述开始】(.*?)【SEO描述结束】.*?(.*?)【第\1篇结束】/s';
+            $pattern = '/【第(\d+)篇开始】.*?【标题开始】(.*?)【标题结束】.*?【关键词开始】(.*?)【关键词结束】.*?【SEO描述开始】(.*?)【SEO描述结束】.*?【正文开始】(.*?)【正文结束】.*?【第\1篇结束】/s';
 
             preg_match_all($pattern, $articleContent, $matches, PREG_SET_ORDER);
             foreach ($matches as $match) {
@@ -268,7 +278,7 @@ class AiArticleLogic
                     'title' => $match[2], // 标题
                     'keywords' => $match[3], // 关键词
                     'description' => $match[4], // SEO描述
-                    'content' => $match[5], // 正文内容
+                    'content' => trim($match[5]), // 正文内容
                 ];
             }
         
@@ -288,7 +298,7 @@ class AiArticleLogic
                 'title' => $title,
                 'keywords' => $keywords,
                 'description' => $description,
-                'content' => $content
+                'content' => trim($content)
             ];
         }
         return $result;

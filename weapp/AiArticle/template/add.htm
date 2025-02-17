@@ -21,16 +21,6 @@
                 </dl>
                 <dl class="row">
                     <dt class="tit">
-                        <label for="seo_parameters">SEO 参数</label>
-                    </dt>
-                    <dd class="opt">
-                        <textarea name="seo_parameters" id="seo_parameters" class="input-txt" rows="3"></textarea>
-                        <span class="err"></span>
-                        <p class="notic"></p>
-                    </dd>
-                </dl>
-                <dl class="row">
-                    <dt class="tit">
                         <label for="article_language">文章语言</label>
                     </dt>
                     <dd class="opt">
@@ -137,11 +127,6 @@
             if ($('input[name=article_theme]').val() == '') {
                 showErrorMsg('文章主题不能为空！');
                 $('input[name=article_theme]').focus();
-                return false;
-            }
-            if ($('input[name=seo_parameters]').val() == '') {
-                showErrorMsg('SEO 参数不能为空！');
-                $('input[name=seo_parameters]').focus();
                 return false;
             }
             if ($('input[name=article_count]').val() == '') {

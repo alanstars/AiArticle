@@ -13,8 +13,8 @@
                 </dt>
                 <dd class="opt">
                     <select name="ai_model_identifier" id="ai_model_identifier" class="input-txt">
-                        <option value="deepseek" data-name="DeepSeek" {if $row.ai_model_identifier == 'deepseek'}selected{/if}>DeepSeek</option>
-                        <option value="chatgpt" data-name="ChatGPT" {if $row.ai_model_identifier == 'chatgpt'}selected{/if}>ChatGPT</option>
+                        <option value="DeepSeek" data-name="DeepSeek" {if $row.ai_model_identifier == 'DeepSeek'}selected{/if}>DeepSeek</option>
+                        <!-- <option value="ChatGPT" data-name="ChatGPT" {if $row.ai_model_identifier == 'ChatGPT'}selected{/if}>ChatGPT</option> -->
                     </select>
                     <span class="err"></span>
                     <p class="notic"></p>
@@ -95,9 +95,7 @@
                 if(res.code == 1){
                     var _parent = parent;
                     _parent.layer.close(parentObj);
-                    _parent.layer.msg(res.msg, {shade: layer_shade, time: 1000}, function(){
-                        _parent.window.location.reload();
-                    });
+                    _parent.layer.msg(res.msg, {shade: layer_shade, time: 1000});
                 }else{
                     showErrorMsg(res.msg);
                 }

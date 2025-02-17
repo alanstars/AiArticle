@@ -27,7 +27,7 @@ CREATE TABLE `#@__weapp_ai_article` (
   `ai_model_name` VARCHAR(100) NOT NULL COMMENT 'AI模型名称',
   `ai_model_identifier` VARCHAR(100) NOT NULL COMMENT 'AI模型标识',
   `article_theme` VARCHAR(255) DEFAULT NULL COMMENT '生成文章主题',
-  `seo_parameters` TEXT DEFAULT NULL COMMENT 'SEO参数',
+  `status` tinyint(2) DEFAULT 0 COMMENT '生成状态：1=>已完成；0=>未完成',
   `article_language` VARCHAR(50) DEFAULT 'zh' COMMENT '文章语言',
   `article_count` INT(11) DEFAULT 1 COMMENT '生成文章数量',
   `bind_column_id` INT(11) DEFAULT NULL COMMENT '要绑定的栏目ID',
