@@ -2,8 +2,8 @@
 <script type="text/javascript">
     $(function() {
         var aidNew = {$field.aid|default='0'};
-        var typeidNew = {$typeid|default='0'};
-        if (!typeidNew) typeidNew = {$field.typeid|default='0'};
+        var typeidNew = {$typeid|default='1'};
+        if (!typeidNew) typeidNew = {$field.typeid|default='1'};
         var channeltypeNew = {$channeltype|default='1'};
         var ControllerName = '{$Think.const.CONTROLLER_NAME}';
         var ActionName = '{$Think.const.ACTION_NAME}';
@@ -50,6 +50,7 @@
                         $('#FieldAddonextitem').empty().html(res.data.html);
                         if (1 == init) {
                             $.each(res.data.htmltextField, function (index, value) {
+                                $('#editorId').val(value);
                                 showEditor_1597892187('addonFieldExt_'+value);
                             });
                         }
@@ -78,7 +79,7 @@
     }
 
     // 渲染编辑器
-    function showEditor_1597892187(elemtid) {
+    function showEditor_1597892187(elemtid,userData='') {
 
         var content = '';
         try{
@@ -106,9 +107,9 @@
         // 编辑器准备好后设置默认值
         ue.ready(function () {
             // 设置默认值
-            var defaultValue = "{$articleData.content}";
-            if (defaultValue){
-                content = defaultValue;
+            // var defaultValue = "";
+            if (userData){
+                content = userData;
             }
             ue.setContent(content);
 

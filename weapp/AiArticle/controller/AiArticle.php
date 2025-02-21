@@ -128,9 +128,8 @@ class AiArticle extends Weapp
      */
     public function addArticle()
     {
-        $aId = input('aId/s');
+        $tId = input('tId/s');
         $aiConfig = cache('articleConf');
-        $Data = $this->db->where('id', $aId)->find();
 
         // 手机端后台管理插件标识
         $isMobile = input('param.isMobile/d', 0);
@@ -139,22 +138,22 @@ class AiArticle extends Weapp
         $auth_role_info = $admin_info['auth_role_info'];
         $this->assign('auth_role_info', $auth_role_info);
         $this->assign('admin_info', $admin_info);
-        if (!empty($aId)) {
-            $ai = new AiArticleLogic($aiConfig['ai_config_key'], $aiConfig['ai_model_identifier']);
-            $response = $ai->getMessage($Data['article_theme']);
-            if ($response['code'] == 200) {
-                $data = $response['data'];
-                $articleData['title'] = $data['title'];
-                $articleData['content'] = $data['content'];
-                $articleData['keywords'] = data['keywords'];
-                $articleData['description'] = $data['description'];
-                $this->assign('articleData', $articleData);
-            }else{
-                return $this->error($response['msg']);
-            }
-            // dump($articleData);
-        }
-        $typeid = input('param.typeid/d', 0);
+        // if (!empty($tId)) {
+        //     $ai = new AiArticleLogic($aiConfig['ai_config_key'], $aiConfig['ai_model_identifier']);
+        //     $response = $ai->getMessage($Data['article_theme']);
+        //     if ($response['code'] == 200) {
+        //         $data = $response['data'];
+        //         $articleData['title'] = $data['title'];
+        //         $articleData['content'] = $data['content'];
+        //         $articleData['keywords'] = data['keywords'];
+        //         $articleData['description'] = $data['description'];
+        //         $this->assign('articleData', $articleData);
+        //     }else{
+        //         return $this->error($response['msg']);
+        //     }
+        //     // dump($articleData);
+        // }
+        $typeid = input('typeid/d', 0);;
         $assign_data['typeid'] = $typeid;
 
         $arctypeInfo = Db::name('arctype')->find($typeid);
@@ -220,8 +219,28 @@ class AiArticle extends Weapp
         $this->assign($assign_data);
 
         return $this->fetch('addArticle');
-
-
+    }
+    /**
+     * 插件后台管理 - ajax 获取 ai 返回的文章内容
+     */
+    public function getAiArticle(){
+        $aiConfig = cache('articleConf');
+        $aiTitle = input('aiTitle/s');
+        if (!empty($aiTitle)) {
+            $ai = new AiArticleLogic($aiConfig['ai_config_key'], $aiConfig['ai_model_identifier']);
+            $response = $ai->getMessage($aiTitle);
+            if ($response['code'] == 200) {
+                $data = $response['data'][0];
+                $articleData['title'] = $data['title'];
+                $articleData['content'] = $data['content'];
+                $articleData['keywords'] = $data['keywords'];
+                $articleData['description'] = $data['description'];
+                $this->success('获取成功', '', $articleData);
+            }else{
+                return $this->error($response['msg']);
+            }
+            // dump($articleData);
+        }
     }
 
     /**

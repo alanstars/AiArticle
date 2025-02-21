@@ -32,7 +32,7 @@
             </ul>
         </div>
     </div>
-
+    
     <form class="form-horizontal" id="post_form" action="{:url('Article/add')}" method="post">
         <!-- 常规信息 -->
         <div class="ncap-form-default tab_div_1">
@@ -41,7 +41,7 @@
                     <label for="title"><em>*</em>文档标题</label>
                 </dt>
                 <dd class="opt">
-                    <input type="text" name="title" value="{$articleData.title}" id="title" class="input-txt" maxlength="200" {eq name="$channelRow.is_repeat_title" value="0"} oninput="check_title_repeat(this,0);" {/eq}>
+                    <input type="text" name="title" value="" id="title" class="input-txt" maxlength="200" {eq name="$channelRow.is_repeat_title" value="0"} oninput="check_title_repeat(this,0);" {/eq}>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     副标题：<input type="text" name="subtitle" value="" id="subtitle" class="w200">
                     <span class="err"></span>
@@ -92,7 +92,7 @@
                     <label>文档标签</label>
                 </dt>
                 <dd class="opt">          
-                    <input type="text" value="{$articleData.keywords}" name="tags" id="tags" class="input-txt" placeholder="多个标签之间以逗号隔开" autocomplete="off" oninput="get_common_tagindex_input(this);" onfocus="$('#often_tags').hide();" onkeyup="this.value=this.value.replace(/[\，]/g,',');" onpaste="this.value=this.value.replace(/[\，]/g,',')">&nbsp;
+                    <input type="text" value="" name="tags" id="tags" class="input-txt" placeholder="多个标签之间以逗号隔开" autocomplete="off" oninput="get_common_tagindex_input(this);" onfocus="$('#often_tags').hide();" onkeyup="this.value=this.value.replace(/[\，]/g,',');" onpaste="this.value=this.value.replace(/[\，]/g,',')">&nbsp;
                     <a href="javascript:void(0);" onclick="get_common_tagindex(this);">显示常用标签</a>&nbsp;<img id="tag_loading" src="__STATIC__/common/images/loading.gif" style="display: none;" />
                     <div class="often_tags" id="often_tags" data-opt="add" style="display: none;"></div>
                     <div class="often_tags" id="often_tags_input" style="display: none;"></div>
@@ -135,7 +135,7 @@
                     <label for="seo_title">SEO标题</label>
                 </dt>
                 <dd class="opt">
-                    <input type="text" value="{$articleData.seo_title}" name="seo_title" id="seo_title" class="input-txt">
+                    <input type="text" value="" name="seo_title" id="seo_title" class="input-txt">
 					<span class="err"></span>
                     <p class="notic">建议80个字符以内，不填写则使用 {$global['seo_viewtitle_msg']} 在前端展示</p>
                 </dd>
@@ -155,7 +155,7 @@
                     <label>SEO描述</label>
                 </dt>
                 <dd class="opt">          
-                    <textarea rows="5" cols="60" id="seo_description" name="seo_description" style="height:54px;" class="keywordsTextarea" onkeyup="monitorInputStr();" onkeypress="monitorInputStr();">{$articleData.description}</textarea>
+                    <textarea rows="5" cols="60" id="seo_description" name="seo_description" style="height:54px;" class="keywordsTextarea" onkeyup="monitorInputStr();" onkeypress="monitorInputStr();"></textarea>
                     <span class="err"></span>
                     <p class="notic">一般不超过{$global['seo_description_length']|default=config('global.arc_seo_description_length')}个字符，不填写时系统自动提取正文的前{$global['seo_description_length']|default=config('global.arc_seo_description_length')}个字符</p>
                     <p class="notic2 none" id="beenWritten">你已输入<span id="beenWrittenStr">0</span>个字符</p>
@@ -264,8 +264,72 @@
             </div>
         </div> 
     </form>
+
+    <form class="form-horizontal" id="getArticle" action="{:url('Article/getArticle')}" method="post" style="position: fixed;top: 100px;right: 10px;z-index: 9999;">
+        <div class="ncap-form-default">
+            <dl class="row">
+                <dt class="tit">
+                    <label for="title"><em>*</em>AI提示内容</label>
+                </dt>
+                <dd class="opt">
+                    <textarea name="aiTitle" id="aiTitle" cols="30" rows="10" class="tarea" placeholder="请输入AI提示内容"></textarea>
+                    <p class="notic">请填写需要生成的提示内容，越详细生成的文章越准确，每次生成一篇。</p>
+                </dd>
+            </dl>
+            <dl class="row">
+                <dd class="opt">
+                    <input type="hidden" id="editorId" value="">
+                    <a href="JavaScript:void(0);" onclick="getArticle();" class="ncap-btn-big ncap-btn-green" style="vertical-align:top" id="submitGetBtn">生成文章</a>
+                </dd>
+            </dl>
+
+        </div>
+    </form>
 </div>
 <script type="text/javascript">
+    var parentObj = parent.layer.getFrameIndex(window.name);
+    //获取 AI 生成的文章内容
+    function getArticle() {
+            var aiTitle = $('#aiTitle').val();
+            var editorId = $('#editorId').val();
+            console.log("editorId:",editorId);
+            layer_loading('正在处理');
+            $.ajax({
+                type: 'post',
+                url: "{:weapp_url('AiArticle/AiArticle/getAiArticle', ['_ajax'=>1])}",
+                data: {'aiTitle': aiTitle},
+                dataType: 'json',
+                success: function (res) {
+                    console.log(res);
+                    layer.closeAll();
+                    if (res.code == 1) {
+                        console.log(res.data);
+                        //将获取到的文章内容赋值给编辑器    {title: '文章标题fsfdsfdsfffgdfdf', content: '文章内容文章内容文章内容文章内容文章内容', keywords: '文章关键词', description: '文章描述'}
+                        //将获取到的文章内容赋值给 UE 编辑器
+                        showEditor_1597892187('addonFieldExt_'+editorId, res.data.content);
+                        //将获取到的文章标题赋值给文章标题输入框
+                        $('#title').val(res.data.title);
+                        $('#seo_title').val(res.data.title);
+                        //将获取到的文章关键词赋值给文章关键词输入框
+                        $('#tags').val(res.data.keywords);
+                        $('#seo_keywords').val(res.data.keywords);
+                        //将获取到的文章描述赋值给文章描述输入
+                        $('#seo_description').val(res.data.description);
+
+                        var _parent = parent;
+                        _parent.layer.close(parentObj);
+                        _parent.layer.msg(res.msg, { shade: layer_shade, time: 2000 });
+                    } else {
+                        showErrorMsg(res.msg);
+                    }
+                },
+                error: function (e) {
+                    layer.closeAll();
+                    showErrorAlert(e.responseText);
+                }
+            });
+    }
+
     layui.use('laydate', function() {
         var laydate = layui.laydate;
 
@@ -274,8 +338,9 @@
             ,type: 'datetime'
         });
     })
-
+    
     $(function () {
+        
         //选项卡切换列表
         $('.tab-base').find('.tab').click(function(){
             $('.tab-base').find('.tab').each(function(){
