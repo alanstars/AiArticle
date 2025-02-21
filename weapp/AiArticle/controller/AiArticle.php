@@ -13,16 +13,12 @@
 
 namespace weapp\AiArticle\controller;
 
-use Symfony\Component\Process\Exception\RuntimeException;
 use think\Page;
 use think\Db;
 use app\common\controller\Weapp;
 use weapp\AiArticle\logic\AiArticleLogic;
 use weapp\AiArticle\model\AiArticleModel;
-use Symfony\Component\Process\Process;
 
-require_once APP_PATH . './../weapp/AiArticle/vendor/autoload.php';
-// vendor(APP_PATH . './../weapp/AiArticle/vendor/autoload.php');
 /**
  * 插件的控制器
  */
@@ -31,6 +27,7 @@ class AiArticle extends Weapp
     /**
      * 实例化模型
      */
+    public $nid = 'article';
     private $model;
 
     /**
@@ -105,27 +102,8 @@ class AiArticle extends Weapp
      */
     public function index()
     {
-        echo APP_PATH . './../weapp/AiArticle/vendor/autoload.php';
-        
-        
-        $process = new Process(['php',APP_PATH.'./../weapp/AiArticle/logic/cron.php']);
-        $process->run();
-        if ($process->isSuccessful()) {
-            echo '执行成功'; 
-        }else{
-            echo '执行失败';
-            dump($process->getErrorOutput());
 
-        }
-        // echo 1111;
 
-        // $message = request()->get('msg');
-        // $ai =  new AiArticleLogic('sk-39bf65b467d84be0bc1b262432868ad8','DeepSeek','');
-        // $message = '我需要你帮我写2篇关于遮阳篷的文章，字数在400字左右';
-        // $response = $ai->getMessage($message);
-        // dump($response);
-        // // echo $response;
-        exit;
 
         $list = array();
         $keywords = input('keywords/s');
@@ -150,22 +128,98 @@ class AiArticle extends Weapp
      */
     public function addArticle()
     {
-        $tId = input('id/s');
+        $aId = input('aId/s');
         $aiConfig = cache('articleConf');
-        $articleData = $this->db->where('id', $tId)->find();
-        $ai =  new AiArticleLogic($aiConfig['ai_config_key'],$aiConfig['ai_model_identifier']);
-    
-        $response = $ai->getMessage($articleData['article_theme']);
-        if ($response['code'] == 200) {
-            $data = $response['data'];
-            // $articleData['title'] = $data['title'];
-            // $articleData['content'] = $data['content'];
-            // $articleData['keywords'] = data['keywords'];
-            // $articleData['description'] = $data['description'];
+        $Data = $this->db->where('id', $aId)->find();
 
+        // 手机端后台管理插件标识
+        $isMobile = input('param.isMobile/d', 0);
+
+        $admin_info = session('admin_info');
+        $auth_role_info = $admin_info['auth_role_info'];
+        $this->assign('auth_role_info', $auth_role_info);
+        $this->assign('admin_info', $admin_info);
+        if (!empty($aId)) {
+            $ai = new AiArticleLogic($aiConfig['ai_config_key'], $aiConfig['ai_model_identifier']);
+            $response = $ai->getMessage($Data['article_theme']);
+            if ($response['code'] == 200) {
+                $data = $response['data'];
+                $articleData['title'] = $data['title'];
+                $articleData['content'] = $data['content'];
+                $articleData['keywords'] = data['keywords'];
+                $articleData['description'] = $data['description'];
+                $this->assign('articleData', $articleData);
+            }else{
+                return $this->error($response['msg']);
+            }
+            // dump($articleData);
         }
-        // dump($articleData);
-        dump($response);
+        $typeid = input('param.typeid/d', 0);
+        $assign_data['typeid'] = $typeid;
+
+        $arctypeInfo = Db::name('arctype')->find($typeid);
+
+        $channeltype_list = config('global.channeltype_list');
+        $this->channeltype = $channeltype_list[$this->nid];
+        empty($this->channeltype) && $this->channeltype = 1;
+        //允许发布文档列表的栏目
+        $arctype_html = allow_release_arctype($typeid, array($this->channeltype));
+        $assign_data['arctype_html'] = $arctype_html;
+
+        // 阅读权限
+        $arcrank_list = get_arcrank_list();
+        $assign_data['arcrank_list'] = $arcrank_list;
+
+        // 模板列表
+        $archivesLogic = new \app\admin\logic\ArchivesLogic;
+        $templateList = $archivesLogic->getTemplateList($this->nid);
+        $assign_data['templateList'] = $templateList;
+
+        // 默认模板文件
+        $tempview = 'view_' . $this->nid . '.' . config('template.view_suffix');
+        !empty($arctypeInfo['tempview']) && $tempview = $arctypeInfo['tempview'];
+        $assign_data['tempview'] = $tempview;
+
+        // 会员等级信息
+        $assign_data['users_level'] = model('UsersLevel')->getList('level_id, level_name, level_value');
+
+        // 文档默认浏览量
+        $globalConfig = tpCache('global');
+        if (isset($globalConfig['other_arcclick']) && 0 <= $globalConfig['other_arcclick']) {
+            $arcclick_arr = explode("|", $globalConfig['other_arcclick']);
+            if (count($arcclick_arr) > 1) {
+                $assign_data['rand_arcclick'] = mt_rand($arcclick_arr[0], $arcclick_arr[1]);
+            } else {
+                $assign_data['rand_arcclick'] = intval($arcclick_arr[0]);
+            }
+        } else {
+            $arcclick_config['other_arcclick'] = '500|1000';
+            tpCache('other', $arcclick_config);
+            $assign_data['rand_arcclick'] = mt_rand(500, 1000);
+        }
+
+        // URL模式
+        $tpcache = config('tpcache');
+        $assign_data['seo_pseudo'] = !empty($tpcache['seo_pseudo']) ? $tpcache['seo_pseudo'] : 1;
+
+        /*文档属性*/
+        $assign_data['archives_flags'] = model('ArchivesFlag')->getList();
+
+        $channelRow = Db::name('channeltype')->where('id', $this->channeltype)->find();
+        $channelRow['data'] = json_decode($channelRow['data'], true);
+        $assign_data['channelRow'] = $channelRow;
+
+        // 来源列表
+        $system_originlist = tpSetting('system.system_originlist');
+        $system_originlist = json_decode($system_originlist, true);
+        $system_originlist = !empty($system_originlist) ? $system_originlist : [];
+        $assign_data['system_originlist_0'] = !empty($system_originlist) ? $system_originlist[0] : "";
+        $assign_data['system_originlist_str'] = implode(PHP_EOL, $system_originlist);
+
+
+        $this->assign($assign_data);
+
+        return $this->fetch('addArticle');
 
 
     }
