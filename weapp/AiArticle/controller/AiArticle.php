@@ -13,12 +13,16 @@
 
 namespace weapp\AiArticle\controller;
 
+use Symfony\Component\Process\Exception\RuntimeException;
 use think\Page;
 use think\Db;
 use app\common\controller\Weapp;
 use weapp\AiArticle\logic\AiArticleLogic;
 use weapp\AiArticle\model\AiArticleModel;
+use Symfony\Component\Process\Process;
 
+require_once APP_PATH . './../weapp/AiArticle/vendor/autoload.php';
+// vendor(APP_PATH . './../weapp/AiArticle/vendor/autoload.php');
 /**
  * 插件的控制器
  */
@@ -101,6 +105,18 @@ class AiArticle extends Weapp
      */
     public function index()
     {
+        echo APP_PATH . './../weapp/AiArticle/vendor/autoload.php';
+        
+        
+        $process = new Process(['php',APP_PATH.'./../weapp/AiArticle/logic/cron.php']);
+        $process->run();
+        if ($process->isSuccessful()) {
+            echo '执行成功'; 
+        }else{
+            echo '执行失败';
+            dump($process->getErrorOutput());
+
+        }
         // echo 1111;
 
         // $message = request()->get('msg');
@@ -109,7 +125,7 @@ class AiArticle extends Weapp
         // $response = $ai->getMessage($message);
         // dump($response);
         // // echo $response;
-        // exit;
+        exit;
 
         $list = array();
         $keywords = input('keywords/s');
@@ -146,7 +162,7 @@ class AiArticle extends Weapp
             // $articleData['content'] = $data['content'];
             // $articleData['keywords'] = data['keywords'];
             // $articleData['description'] = $data['description'];
-            
+
         }
         // dump($articleData);
         dump($response);
