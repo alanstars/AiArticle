@@ -27,6 +27,7 @@ class AiArticle extends Weapp
     /**
      * 实例化模型
      */
+    // 模型标识
     public $nid = 'article';
     private $model;
 
@@ -44,6 +45,8 @@ class AiArticle extends Weapp
      * 插件基本信息
      */
     private $weappInfo;
+    // 模型ID
+    public $channeltype = '';
 
     /**
      * 构造方法
@@ -54,6 +57,9 @@ class AiArticle extends Weapp
         $this->model = new AiArticleModel;
         $this->db = Db::name('WeappAiArticle');
         $this->conf = Db::name('WeappAiArticleConf');
+        $channeltype_list = config('global.channeltype_list');
+        $this->channeltype = $channeltype_list[$this->nid];
+        empty($this->channeltype) && $this->channeltype = 1;
 
         /*获取当前系统是否为多语言*/
         $this->langSwitchOn = false;
@@ -103,8 +109,6 @@ class AiArticle extends Weapp
     public function index()
     {
 
-
-
         $list = array();
         $keywords = input('keywords/s');
 
@@ -115,13 +119,25 @@ class AiArticle extends Weapp
 
         $count = $this->db->where($map)->count('id');// 查询满足要求的总记录数
         $pageObj = new Page($count, config('paginate.list_rows'));// 实例化分页类 传入总记录数和每页显示的记录数
-        $list = $this->db->where($map)->order('id desc')->limit($pageObj->firstRow . ',' . $pageObj->listRows)->select();
+        $list = M('weapp_ai_article_lists')->where($map)->order('id desc')->limit($pageObj->firstRow . ',' . $pageObj->listRows)->select();
         $pageStr = $pageObj->show(); // 分页显示输出
         $this->assign('list', $list); // 赋值数据集
         $this->assign('pageStr', $pageStr); // 赋值分页输出
         $this->assign('pager', $pageObj); // 赋值分页对象
 
         return $this->fetch('index');
+    }
+    /**
+     * 插件后台管理 - 获取允许发布的文章模型的栏目列表
+     */
+    public function selectType()
+    {
+        $select_html = allow_release_arctype(0, [1]);
+        $this->assign('js_allow_channel_arr', [1]);
+
+        $this->assign('select_html', $select_html);
+
+        return $this->fetch('select_type');
     }
     /**
      * 插件后台管理 - 新增生成文章记录表
@@ -153,7 +169,8 @@ class AiArticle extends Weapp
         //     }
         //     // dump($articleData);
         // }
-        $typeid = input('typeid/d', 0);;
+        $typeid = input('typeid/d', 0);
+        ;
         $assign_data['typeid'] = $typeid;
 
         $arctypeInfo = Db::name('arctype')->find($typeid);
@@ -223,23 +240,41 @@ class AiArticle extends Weapp
     /**
      * 插件后台管理 - ajax 获取 ai 返回的文章内容
      */
-    public function getAiArticle(){
+    public function getAiArticle()
+    {
         $aiConfig = cache('articleConf');
         $aiTitle = input('aiTitle/s');
+        $typeid = input('typeid/d', 0);
+
         if (!empty($aiTitle)) {
             $ai = new AiArticleLogic($aiConfig['ai_config_key'], $aiConfig['ai_model_identifier']);
             $response = $ai->getMessage($aiTitle);
+
             if ($response['code'] == 200) {
-                $data = $response['data'][0];
+                $data = $response['data']['clearData'];
                 $articleData['title'] = $data['title'];
                 $articleData['content'] = $data['content'];
-                $articleData['keywords'] = $data['keywords'];
-                $articleData['description'] = $data['description'];
+                $articleData['seo_title'] = $data['title'];
+                $articleData['seo_keywords'] = $data['keywords'];
+                $articleData['seo_description'] = $data['description'];
+                $articleData['article_theme'] = $aiTitle;
+                $articleData['created_time'] = getTime();
+                //AI 相关内容
+                $articleData['ai_model_identifier'] = $aiConfig['ai_model_identifier'];
+                $articleData['ai_created_time'] = $response['data']['all']['created'];
+                $articleData['ai_total_tokens'] = $response['data']['all']['usage']['total_tokens'];
+                $articleData['ai_id'] = $response['data']['all']['id'];
+                $articleData['finish_reason'] = $response['data']['all']['choices'][0]['finish_reason'];
+                $articleData['typeid'] = $typeid;
+                $articleData['status'] = 0;
+                $new_id = M('weapp_ai_article_lists')->insertGetId($articleData);
+                $articleData['new_id'] = $new_id;
                 $this->success('获取成功', '', $articleData);
-            }else{
+            } else {
                 return $this->error($response['msg']);
             }
-            // dump($articleData);
+        } else {
+            return $this->error('请输入AI文章标题');
         }
     }
 
@@ -479,6 +514,291 @@ class AiArticle extends Weapp
             }
         } else {
             $this->articleConf = $articleCache;
+        }
+    }
+
+
+    public function addArticleNew()
+    {
+        // 手机端后台管理插件标识
+        $isMobile = input('param.isMobile/d', 0);
+
+        $admin_info = session('admin_info');
+        $auth_role_info = $admin_info['auth_role_info'];
+        $this->assign('auth_role_info', $auth_role_info);
+        $this->assign('admin_info', $admin_info);
+
+        if (IS_POST) {
+            $post = input('post.');
+            model('Archives')->editor_auto_210607($post);
+            //处理TAG标签
+            if (!empty($post['tags_new'])) {
+                $post['tags'] = !empty($post['tags']) ? $post['tags'] . ',' . $post['tags_new'] : $post['tags_new'];
+                unset($post['tags_new']);
+            }
+            $post['tags'] = explode(',', $post['tags']);
+            $post['tags'] = array_unique($post['tags']);
+            $post['tags'] = implode(',', $post['tags']);
+
+            $content = empty($post['addonFieldExt']['content']) ? '' : htmlspecialchars_decode($post['addonFieldExt']['content']);
+            if (!empty($post['restric_type']) && 0 < $post['restric_type']) {
+                $content = input('post.free_content', '', null);
+            }
+
+            // 如果安装后台手机端管理插件则执行
+            if (is_dir('./weapp/Mbackend/') && !empty($isMobile)) {
+                // 调用逻辑层
+                $mbackendLogic = new \weapp\Mbackend\logic\MbackendLogic;
+                $contentData = $mbackendLogic->fileCacheHandle('get');
+                $content = !empty($contentData['content']) ? $contentData['content'] : '';
+                $post['addonFieldExt']['content'] = $post['addonFieldExt']['content_ey_m'] = $content;
+                $content = !empty($content) ? htmlspecialchars_decode($content) : '';
+            }
+
+            // 根据标题自动提取相关的关键字
+            $seo_keywords = $post['seo_keywords'];
+            if (!empty($seo_keywords)) {
+                $seo_keywords = str_replace('，', ',', $seo_keywords);
+            } else {
+                // $seo_keywords = get_split_word($post['title'], $content);
+            }
+
+            // 自动获取内容第一张图片作为封面图
+            $is_remote = !empty($post['is_remote']) ? $post['is_remote'] : 0;
+            $litpic = '';
+            if ($is_remote == 1) {
+                $litpic = $post['litpic_remote'];
+            } else {
+                $litpic = $post['litpic_local'];
+            }
+            if (empty($litpic)) {
+                $litpic = get_html_first_imgurl($content);
+            }
+            $post['litpic'] = $litpic;
+
+            if (empty($post['litpic'])) {
+                $is_litpic = 0; // 无封面图
+            } else {
+                $is_litpic = 1; // 有封面图
+            }
+
+            // SEO描述
+            $seo_description = '';
+            if (empty($post['seo_description']) && !empty($content)) {
+                $seo_description = @msubstr(checkStrHtml($content), 0, get_seo_description_length(), false);
+            } else {
+                $seo_description = $post['seo_description'];
+            }
+
+            // 外部链接跳转
+            $jumplinks = '';
+            $is_jump = isset($post['is_jump']) ? $post['is_jump'] : 0;
+            if (intval($is_jump) > 0) {
+                $jumplinks = $post['jumplinks'];
+            }
+
+            // 模板文件，如果文档模板名与栏目指定的一致，默认就为空。让它跟随栏目的指定而变
+            if ($post['type_tempview'] == $post['tempview']) {
+                unset($post['type_tempview']);
+                unset($post['tempview']);
+            }
+
+            //处理自定义文件名,仅由字母数字下划线和短横杆组成,大写强制转换为小写
+            $htmlfilename = trim($post['htmlfilename']);
+            if (!empty($htmlfilename)) {
+                $htmlfilename = preg_replace("/[^\x{4e00}-\x{9fa5}\w\-]+/u", "-", $htmlfilename);
+                // $htmlfilename = strtolower($htmlfilename);
+                //判断是否存在相同的自定义文件名
+                $map = [
+                    'htmlfilename' => $htmlfilename,
+                    'lang' => $this->admin_lang,
+                ];
+                if (!empty($post['typeid'])) {
+                    $map['typeid'] = array('eq', $post['typeid']);
+                }
+                $filenameCount = Db::name('archives')->where($map)->count();
+                if (!empty($filenameCount)) {
+                    $this->error("同栏目下，自定义文件名已存在！");
+                } else if (preg_match('/^(\d+)$/i', $htmlfilename)) {
+                    $this->error("自定义文件名不能纯数字，会与文档ID冲突！");
+                }
+            } else {
+                // 处理外贸链接
+                if (is_dir('./weapp/Waimao/')) {
+                    $waimaoLogic = new \weapp\Waimao\logic\WaimaoLogic;
+                    $waimaoLogic->get_new_htmlfilename($htmlfilename, $post, 'add', $this->globalConfig);
+                } else {
+                    $foreignLogic = new \app\admin\logic\ForeignLogic;
+                    $foreignLogic->get_new_htmlfilename($htmlfilename, $post, 'add', $this->globalConfig);
+                }
+            }
+            $post['htmlfilename'] = $htmlfilename;
+
+            //做自动通过审核判断
+            if ($admin_info['role_id'] > 0 && $auth_role_info['check_oneself'] < 1) {
+                $post['arcrank'] = -1;
+            }
+
+            // 付费限制模式与之前三个字段 arc_level_id、 users_price、 users_free 组合逻辑兼容
+            $restricData = restric_type_logic($post, $this->channeltype);
+            if (isset($restricData['code']) && empty($restricData['code'])) {
+                $this->error($restricData['msg']);
+            }
+
+            // 副栏目
+            if (isset($post['stypeid'])) {
+                $post['stypeid'] = preg_replace('/([^\d\,\，]+)/i', ',', $post['stypeid']);
+                $post['stypeid'] = str_replace('，', ',', $post['stypeid']);
+                $post['stypeid'] = trim($post['stypeid'], ',');
+                $post['stypeid'] = str_replace(",{$post['typeid']},", ',', ",{$post['stypeid']},");
+                $post['stypeid'] = trim($post['stypeid'], ',');
+            }
+
+            // 存储数据
+            $newData = array(
+                'typeid' => empty($post['typeid']) ? 0 : $post['typeid'],
+                'channel' => $this->channeltype,
+                'is_b' => empty($post['is_b']) ? 0 : $post['is_b'],
+                'is_head' => empty($post['is_head']) ? 0 : $post['is_head'],
+                'is_special' => empty($post['is_special']) ? 0 : $post['is_special'],
+                'is_recom' => empty($post['is_recom']) ? 0 : $post['is_recom'],
+                'is_roll' => empty($post['is_roll']) ? 0 : $post['is_roll'],
+                'is_slide' => empty($post['is_slide']) ? 0 : $post['is_slide'],
+                'is_diyattr' => empty($post['is_diyattr']) ? 0 : $post['is_diyattr'],
+                'editor_remote_img_local' => empty($post['editor_remote_img_local']) ? 0 : $post['editor_remote_img_local'],
+                'editor_img_clear_link' => empty($post['editor_img_clear_link']) ? 0 : $post['editor_img_clear_link'],
+                'is_jump' => $is_jump,
+                'is_litpic' => $is_litpic,
+                'jumplinks' => $jumplinks,
+                'origin' => empty($post['origin']) ? '网络' : $post['origin'],
+                'seo_keywords' => $seo_keywords,
+                'seo_description' => $seo_description,
+                'admin_id' => session('admin_info.admin_id'),
+                'lang' => $this->admin_lang,
+                'sort_order' => 100,
+                'crossed_price' => empty($post['crossed_price']) ? 0 : floatval($post['crossed_price']),
+                'users_price' => empty($post['users_price']) ? 0 : floatval($post['users_price']),
+                'old_price' => empty($post['old_price']) ? 0 : floatval($post['old_price']),
+                'add_time' => strtotime($post['add_time']),
+                'update_time' => strtotime($post['add_time']),
+            );
+            $data = array_merge($post, $newData);
+            $aid = Db::name('archives')->insertGetId($data);
+            if (!empty($aid)) {
+                $_POST['aid'] = $aid;
+                if (!empty($post['restric_type']) && 0 < $post['restric_type']) {
+                    if (empty($post['size'])) {
+                        $post['size'] = 1;
+                    }
+                    $free_content = !empty($post['free_content']) ? $post['free_content'] : '';
+                    if (!empty($post['part_free']) && 2 == $post['part_free']) {
+                        $free_content = htmlspecialchars_decode($post['addonFieldExt']['content']);
+                        $free_content = $this->SpLongBody($free_content, $post['size']);
+                        // $free_content = $this->SpLongBody($free_content,$post['size']*1024);
+                        $free_content = htmlspecialchars($free_content);
+                    }
+                    Db::name('article_pay')->insert([
+                        'aid' => $aid,
+                        'part_free' => isset($post['part_free']) ? intval($post['part_free']) : 0,
+                        'size' => $post['size'],
+                        'free_content' => $free_content,
+                        'add_time' => getTime(),
+                    ]);
+                }
+                model('Article')->afterSave($aid, $data, 'add');
+                M('weapp_ai_article_lists')->where(['id' => $post['new_id']])->update(['aid' => $aid, 'typeid' => $post['typeid'], 'status' => 1, 'publish_time' => getTime(), 'updated_time' => getTime()]);
+                // 添加查询执行语句到mysql缓存表
+                model('SqlCacheTable')->InsertSqlCacheTable();
+                adminLog('新增文章：' . $data['title']);
+
+                // 如果安装后台手机端管理插件则执行
+                if (is_dir('./weapp/Mbackend/') && !empty($isMobile)) {
+                    // 调用逻辑层
+                    $mbackendLogic = new \weapp\Mbackend\logic\MbackendLogic;
+                    $mbackendLogic->fileCacheHandle('del');
+                }
+
+                // 生成静态页面代码
+                $successData = [
+                    'aid' => $aid,
+                    'tid' => $post['typeid'],
+                    'method' => 'add',
+                ];
+                $this->success("添加文章成功!", weapp_url('AiArticle/AiArticle/index'), $successData, 2);
+            }
+            $this->error("操作失败!");
+        }
+
+        $typeid = input('param.typeid/d', 0);
+        $assign_data['typeid'] = $typeid;
+
+        $arctypeInfo = Db::name('arctype')->find($typeid);
+
+        //允许发布文档列表的栏目
+        $arctype_html = allow_release_arctype($typeid, array($this->channeltype));
+        $assign_data['arctype_html'] = $arctype_html;
+
+        // 阅读权限
+        $arcrank_list = get_arcrank_list();
+        $assign_data['arcrank_list'] = $arcrank_list;
+
+        // 模板列表
+        $archivesLogic = new \app\admin\logic\ArchivesLogic;
+        $templateList = $archivesLogic->getTemplateList($this->nid);
+        $assign_data['templateList'] = $templateList;
+
+        // 默认模板文件
+        $tempview = 'view_' . $this->nid . '.' . config('template.view_suffix');
+        !empty($arctypeInfo['tempview']) && $tempview = $arctypeInfo['tempview'];
+        $assign_data['tempview'] = $tempview;
+
+        // 会员等级信息
+        $assign_data['users_level'] = model('UsersLevel')->getList('level_id, level_name, level_value');
+
+        // 文档默认浏览量
+        $globalConfig = tpCache('global');
+        if (isset($globalConfig['other_arcclick']) && 0 <= $globalConfig['other_arcclick']) {
+            $arcclick_arr = explode("|", $globalConfig['other_arcclick']);
+            if (count($arcclick_arr) > 1) {
+                $assign_data['rand_arcclick'] = mt_rand($arcclick_arr[0], $arcclick_arr[1]);
+            } else {
+                $assign_data['rand_arcclick'] = intval($arcclick_arr[0]);
+            }
+        } else {
+            $arcclick_config['other_arcclick'] = '500|1000';
+            tpCache('other', $arcclick_config);
+            $assign_data['rand_arcclick'] = mt_rand(500, 1000);
+        }
+
+        // URL模式
+        $tpcache = config('tpcache');
+        $assign_data['seo_pseudo'] = !empty($tpcache['seo_pseudo']) ? $tpcache['seo_pseudo'] : 1;
+
+        /*文档属性*/
+        $assign_data['archives_flags'] = model('ArchivesFlag')->getList();
+
+        $channelRow = Db::name('channeltype')->where('id', $this->channeltype)->find();
+        $channelRow['data'] = json_decode($channelRow['data'], true);
+        $assign_data['channelRow'] = $channelRow;
+
+        // 来源列表
+        $system_originlist = tpSetting('system.system_originlist');
+        $system_originlist = json_decode($system_originlist, true);
+        $system_originlist = !empty($system_originlist) ? $system_originlist : [];
+        $assign_data['system_originlist_0'] = !empty($system_originlist) ? $system_originlist[0] : "";
+        $assign_data['system_originlist_str'] = implode(PHP_EOL, $system_originlist);
+
+        // 多站点，当用站点域名访问后台，发布文档自动选择当前所属区域
+        model('Citysite')->auto_location_select($assign_data);
+
+        $this->assign($assign_data);
+
+        // 如果安装手机端后台管理插件并且在手机端访问时执行
+        if (is_dir('./weapp/Mbackend/') && !empty($isMobile)) {
+            $this->assign('arctypeInfo', $arctypeInfo);
+            return $this->display('archives/add');
+        } else {
+            return $this->fetch();
         }
     }
 

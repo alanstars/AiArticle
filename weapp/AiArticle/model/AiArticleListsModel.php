@@ -18,12 +18,12 @@ use think\Model;
 /**
  * 模型
  */
-class AiArticleModel extends Model
+class AiArticleListsModel extends Model
 {
     /**
      * 数据表名，不带前缀
      */
-    public $name = 'weapp_ai_article';
+    public $name = 'weapp_ai_article_lists';
 
     //初始化
     protected function initialize()

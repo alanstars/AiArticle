@@ -140,6 +140,7 @@ class AiArticleLogic
         if (isset($responseData['choices'][0]['message']['content'])) {
             $articleContent = $responseData['choices'][0]['message']['content'];
             $result = $this->cleanData($articleContent);
+            $result['all'] = $responseData;
             // return $articleContent;
             return ['code'=>200,'data'=>$result,'msg'=>'success'];
         } else {
@@ -294,7 +295,7 @@ class AiArticleLogic
             $description = isset($descriptionMatches[1]) ? $descriptionMatches[1] : '';
             $content = isset($contentMatches[1]) ? $contentMatches[1] : '';
 
-            $result[] = [
+            $result['clearData'] = [
                 'title' => $title,
                 'keywords' => $keywords,
                 'description' => $description,

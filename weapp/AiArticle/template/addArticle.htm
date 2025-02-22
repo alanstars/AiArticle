@@ -33,7 +33,7 @@
         </div>
     </div>
     
-    <form class="form-horizontal" id="post_form" action="{:url('Article/add')}" method="post">
+    <form class="form-horizontal" id="post_form" action="{:weapp_url('AiArticle/AiArticle/addArticleNew')}" method="post">
         <!-- 常规信息 -->
         <div class="ncap-form-default tab_div_1">
             <dl class="row">
@@ -259,6 +259,7 @@
                 <textarea name="free_content" id="free_content" style="display: none;"></textarea>
                 <input type="hidden" name="gourl" value="{$gourl|default=''}">
                 <input type="hidden" name="editor_addonFieldExt" id="editor_addonFieldExt" value="">
+                <input type="hidden" name="new_id" id="new_id" value="">
                 <a href="JavaScript:void(0);" onclick="check_submit();" class="ncap-btn-big ncap-btn-green" id="submitBtn">确认提交</a>
                 {include file="public/callback_page_2" /}<!-- 返回按钮 -->
             </div>
@@ -292,12 +293,19 @@
     function getArticle() {
             var aiTitle = $('#aiTitle').val();
             var editorId = $('#editorId').val();
-            console.log("editorId:",editorId);
+            var typeid = {$typeid|default='0'};
+            if(typeid == 0){
+                layer.alert('请选择栏目…！', {icon:5, title:false}, function(index){
+                    $('#typeid').val('');
+                    layer.close(index);
+                });
+                return false;
+            }
             layer_loading('正在处理');
             $.ajax({
                 type: 'post',
                 url: "{:weapp_url('AiArticle/AiArticle/getAiArticle', ['_ajax'=>1])}",
-                data: {'aiTitle': aiTitle},
+                data: {'aiTitle': aiTitle,'typeid':typeid},
                 dataType: 'json',
                 success: function (res) {
                     console.log(res);
@@ -312,9 +320,11 @@
                         $('#seo_title').val(res.data.title);
                         //将获取到的文章关键词赋值给文章关键词输入框
                         $('#tags').val(res.data.keywords);
-                        $('#seo_keywords').val(res.data.keywords);
+                        $('#seo_keywords').val(res.data.seo_keywords);
                         //将获取到的文章描述赋值给文章描述输入
-                        $('#seo_description').val(res.data.description);
+                        $('#seo_description').val(res.data.seo_description);
+                        //将获取到的文章标题赋值给文章标题输入框
+                        $('#new_id').val(res.data.new_id);
 
                         var _parent = parent;
                         _parent.layer.close(parentObj);

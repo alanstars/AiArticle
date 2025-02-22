@@ -8,9 +8,9 @@
         <div class="mDiv">
             <div class="ftitle">
                 <div class="fbutton">
-                    <a href="javascript:void(0);" data-href="{:weapp_url('AiArticle/AiArticle/selectType')}" onclick="openFullframe(this, '点击进入生成文章','420px');">
+                    <a href="javascript:void(0);" data-href="{:weapp_url('AiArticle/AiArticle/add')}" onclick="openFullframe(this, '新增文章生成规则');">
                         <div class="add">
-                            <span><i class="layui-icon layui-icon-addition"></i>点击进入生成文章</span>
+                            <span><i class="layui-icon layui-icon-addition"></i>新增文章生成规则</span>
                         </div>
                     </a>
                 </div>
@@ -37,28 +37,28 @@
                         <th abbr="article_show" axis="col5" class="w40">
                             <div class="tc">ID</div>
                         </th>
-                        <th abbr="article_title" axis="col3" class="w200">
-                            <div class="tc">发布的文章标题</div>
+                        <th abbr="article_title" axis="col3" class="w400">
+                            <div class="tc">文章主题</div>
                         </th>
                         
                         <th abbr="article_time" axis="col6" class="w100">
                             <div class="tc">绑定栏目</div>
                         </th>
-                        <th abbr="article_time" axis="col6" class="w400">
-                            <div class="tc">输入的文章提示词</div>
+                        <th abbr="article_time" axis="col6" class="w160">
+                            <div class="tc">生成和发布数量</div>
                         </th>
                         <th abbr="article_time" axis="col6" class="w160">
-                            <div class="tc">消耗token数</div>
+                            <div class="tc">发布时间规则</div>
                         </th>
                         <th abbr="ac_id" axis="col4" class="w100">
                             <div style="text-align: left; padding-left: 10px;" class="">生成状态</div>
                         </th>
                         <th axis="col1" class="w120">
-                            <div class="tc">生成时间</div>
+                            <div class="tc">操作</div>
                         </th>
-                        <<!-- th axis="col1" class="w120">
+                        <th axis="col1" class="w120">
                             <div class="tc">发布</div>
-                        </th> -->
+                        </th>
                     </tr>
                     </thead>
                 </table>
@@ -88,26 +88,26 @@
                                 </div>
                             </td>
                             <td class="">
-                                <div class="w200 tc">
-                                    <!-- <a href="{:weapp_url('AiArticle/AiArticle/edit',array('id'=>$vo['id']))}">{$vo.article_theme}</a> -->
-                                    {$vo.title}
+                                <div class="w400 tc">
+                                    <a href="{:weapp_url('AiArticle/AiArticle/edit',array('id'=>$vo['id']))}">{$vo.article_theme}</a>
                                 </div>
                             </td>
                             
                             <td class="">
                                 <div class="w100 tc">
-                                    {$vo.typeid}
-                                </div>
-                            </td>
-                            <td class="">
-                                <div class="w400 tc">
-                                    {$vo.article_theme}
+                                    {$vo.bind_column_id}
                                 </div>
                             </td>
                             <td class="">
                                 <div class="w160 tc">
-                                    {$vo.ai_total_tokens}个tokens
-                                    
+                                    {$vo.article_count}--{$vo.publish_count}<br>
+                                    {$vo.updated_time|MyDate='Y-m-d H:i:s',###}
+                                </div>
+                            </td>
+                            <td class="">
+                                <div class="w160 tc">
+                                    {$vo.publish_schedule}<br>
+                                    {$vo.created_time|MyDate='Y-m-d H:i:s',###}
                                 </div>
                             </td>
                             <td class="w100 tc" >
@@ -115,12 +115,16 @@
                                     {$vo.status}
                                 </div>
                             </td>
-                            <td class="w100 tc">
-                                {$vo.ai_created_time|MyDate='Y-m-d H:i:s',###}
+                            <td class="operation">
+                                <div class="w120 tc">
+                                    <a href="{:weapp_url('AiArticle/AiArticle/edit',array('id'=>$vo['id']))}" class="btn blue">编辑</a>
+                                    <i></i>
+                                    <a class="btn red"  href="javascript:void(0)" data-url="{:weapp_url('AiArticle/AiArticle/del')}" data-id="{$vo.id}" onClick="delfun(this);">删除</a>
+                                </div>
                             </td>
                             <td class="sort">
                                 <div class="w60 tc">
-                                    <a href="" href="_blank" class="btn blue">预览</a>
+                                    <a href="{:weapp_url('AiArticle/AiArticle/addArticle',array('tId'=>$vo['id']))}" href="_blank" class="btn blue">生成文章</a>
                                 </div>
                             </td>
                         </tr>
