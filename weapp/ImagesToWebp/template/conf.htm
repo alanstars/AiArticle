@@ -1,0 +1,101 @@
+{include file="header.htm" /}
+<body class="bodystyle" style="overflow-y: scroll; cursor: default; -moz-user-select: inherit;">
+<div id="toolTipLayer" style="position: absolute; z-index: 9999; display: none; visibility: visible; left: 95px; top: 573px;"></div>
+<div id="append_parent"></div>
+<div id="ajaxwaitid"></div>
+<div class="page">
+    {include file="bar.htm" /}
+	<ul class="explanation">
+		<li>开启后可大幅度的压缩图片，通过使用此插件，您可以显著减少网站的加载时间。</li>
+		<li>支持jpg，png，gif格式的图片进行转换！</li>
+		<li>支持系统自带的水印功能！可同时启用！</li>
+		<li>支持栏目管理-系统自带栏目图片以及自定义的单图，多图，编辑器字段</li>
+		<li>内容管理-系统自带任意模型以及自定义模型的单图，多图，编辑器字段</li>
+		<li>广告管理-图片</li>
+		<li>基本信息-网站信息-LOGO</li>
+		<li>基本信息-自定义变量-上传图片的自定义变量</li>
+	</ul>
+    <form class="form-horizontal" id="post_form" action="{:weapp_url('ImagesToWebp/ImagesToWebp/conf')}" method="post">
+        <div class="ncap-form-default">
+            <dl class="row">
+                <dt class="tit">
+                    <label>转换功能</label>
+                </dt>
+                <dd class="opt">
+                    <div class="onoff">
+                        <label for="open1" class="cb-enable {if condition='isset($data.open) && $data.open eq 1'}selected{/if}">开启</label>
+                        <label for="open0" class="cb-disable {if condition='empty($data.open)'}selected{/if}">关闭</label>
+                        <input id="open1" name="open" value="1" type="radio" {if condition="isset($data.open) && $data.open eq 1"} checked="checked"{/if}>
+                        <input id="open0" name="open" value="0" type="radio" {if condition="empty($data.open)"} checked="checked"{/if}>
+                    </div>
+                </dd>
+            </dl>
+            <dl class="row">
+                <dt class="tit">
+                    <label>源文件处理</label>
+                </dt>
+                <dd class="opt">
+                    <div class="onoff">
+                        <label for="sourceFilePath1" class="cb-enable {if condition='isset($data.sourceFilePath) && $data.sourceFilePath eq 1'}selected{/if}">转换成功后删除</label>
+                        <label for="sourceFilePath0" class="cb-disable {if condition='empty($data.sourceFilePath)'}selected{/if}">转换成功后保留</label>
+                        <input id="sourceFilePath1" name="sourceFilePath" value="1" type="radio" {if condition="isset($data.sourceFilePath) && $data.sourceFilePath eq 1"} checked="checked"{/if}>
+                        <input id="sourceFilePath0" name="sourceFilePath" value="0" type="radio" {if condition="empty($data.sourceFilePath)"} checked="checked"{/if}>
+                    </div>
+                </dd>
+            </dl>
+            <dl class="row">
+                <dt class="tit">
+                    <label>远程图片本地化</label>
+                </dt>
+                <dd class="opt">
+                    <div class="onoff">
+                        <label for="saveRemote1" class="cb-enable {if condition='isset($data.saveRemote) && $data.saveRemote eq 1'}selected{/if}">自动本地化</label>
+                        <label for="saveRemote0" class="cb-disable {if condition='empty($data.saveRemote)'}selected{/if}">保持现状</label>
+                        <input id="saveRemote1" name="saveRemote" value="1" type="radio" {if condition="isset($data.saveRemote) && $data.saveRemote eq 1"} checked="checked"{/if}>
+                        <input id="saveRemote0" name="saveRemote" value="0" type="radio" {if condition="empty($data.saveRemote)"} checked="checked"{/if}>
+                    </div>
+                </dd>
+            </dl>
+            <dl class="row">
+                <dt class="tit">
+                    <label>HTML字段处理</label>
+                </dt>
+                <dd class="opt">
+                    <div class="onoff">
+                        <label for="replace_links1" class="cb-enable {if condition='isset($data.replace_links) && $data.replace_links eq 1'}selected{/if}">清除非本站链接</label>
+                        <label for="replace_links0" class="cb-disable {if condition='empty($data.replace_links)'}selected{/if}">保持现状</label>
+                        <input id="replace_links1" name="replace_links" value="1" type="radio" {if condition="isset($data.replace_links) && $data.replace_links eq 1"} checked="checked"{/if}>
+                        <input id="replace_links0" name="replace_links" value="0" type="radio" {if condition="empty($data.replace_links)"} checked="checked"{/if}>
+                    </div>
+                </dd>
+            </dl>            
+			<dl class="row">
+                <dt class="tit">
+                    <label for="width"><em>*</em><span>转换质量</span></label>
+                </dt>
+                <dd class="opt">
+                    <input type="text" name="quality" value="{$data.quality|default='80'}" style="width: 100px;"> 默认80，越低质量越差
+                </dd>
+            </dl>
+			<dl class="row">
+                <dt class="tit">
+                    <label for="width"><em>*</em><span>转换大小</span></label>
+                </dt>
+                <dd class="opt">
+                    <input type="text" name="min_kb" value="{$data.min_kb|default='20'}" style="width: 100px;"> KB，图片超过指定大小才进行转换。
+                </dd>
+            </dl>
+            <div class="bot">
+                <a href="JavaScript:void(0);" onclick="checkForm();" class="ncap-btn-big ncap-btn-green" id="submitBtn">确认提交</a>
+            </div>
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+    // 判断输入框是否为空
+    function checkForm(){
+        layer_loading('正在处理');
+        $('#post_form').submit();
+    }
+</script>
+{include file="footer.htm" /}

@@ -9,12 +9,12 @@ return array (
     'primary' => true,
     'autoinc' => true,
   ),
-  'config_id' => 
+  'article_theme' => 
   array (
-    'name' => 'config_id',
-    'type' => 'int(11)',
+    'name' => 'article_theme',
+    'type' => 'varchar(255)',
     'notnull' => false,
-    'default' => NULL,
+    'default' => '',
     'primary' => false,
     'autoinc' => false,
   ),
@@ -27,18 +27,18 @@ return array (
     'primary' => false,
     'autoinc' => false,
   ),
-  'category_id' => 
+  'typeid' => 
   array (
-    'name' => 'category_id',
+    'name' => 'typeid',
     'type' => 'int(11)',
     'notnull' => false,
     'default' => NULL,
     'primary' => false,
     'autoinc' => false,
   ),
-  'article_id' => 
+  'aid' => 
   array (
-    'name' => 'article_id',
+    'name' => 'aid',
     'type' => 'int(11)',
     'notnull' => false,
     'default' => NULL,
@@ -95,7 +95,7 @@ return array (
     'name' => 'status',
     'type' => 'tinyint(1)',
     'notnull' => false,
-    'default' => '1',
+    'default' => '0',
     'primary' => false,
     'autoinc' => false,
   ),
@@ -113,7 +113,7 @@ return array (
     'name' => 'created_time',
     'type' => 'int(11)',
     'notnull' => false,
-    'default' => NULL,
+    'default' => '0',
     'primary' => false,
     'autoinc' => false,
   ),
@@ -122,7 +122,43 @@ return array (
     'name' => 'updated_time',
     'type' => 'int(11)',
     'notnull' => false,
-    'default' => NULL,
+    'default' => '0',
+    'primary' => false,
+    'autoinc' => false,
+  ),
+  'ai_created_time' => 
+  array (
+    'name' => 'ai_created_time',
+    'type' => 'int(11)',
+    'notnull' => false,
+    'default' => '0',
+    'primary' => false,
+    'autoinc' => false,
+  ),
+  'ai_total_tokens' => 
+  array (
+    'name' => 'ai_total_tokens',
+    'type' => 'int(10)',
+    'notnull' => false,
+    'default' => '0',
+    'primary' => false,
+    'autoinc' => false,
+  ),
+  'ai_id' => 
+  array (
+    'name' => 'ai_id',
+    'type' => 'varchar(100)',
+    'notnull' => false,
+    'default' => '',
+    'primary' => false,
+    'autoinc' => false,
+  ),
+  'finish_reason' => 
+  array (
+    'name' => 'finish_reason',
+    'type' => 'varchar(100)',
+    'notnull' => false,
+    'default' => '',
     'primary' => false,
     'autoinc' => false,
   ),

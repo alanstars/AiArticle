@@ -1,0 +1,18 @@
+{include file="header.htm" /}
+<body class="bodystyle" style="overflow-y: scroll; cursor: default; -moz-user-select: inherit;">
+<div id="toolTipLayer" style="position: absolute; z-index: 9999; display: none; visibility: visible; left: 95px; top: 573px;"></div>
+<div id="append_parent"></div>
+<div id="ajaxwaitid"></div>
+<div class="page">
+    {include file="bar.htm" /}
+	<ul class="explanation">
+		<li>此功能先下架，下一版本集成到后台直接按进度操作！</li>
+    </ul>
+    <div style="line-height:36px;font-size:14px;color:#555;">
+        <p>封面图片api已为您处理<span class="red"> {$litpic} </span>次</p>
+        <p>产品模型（图片集）api已为您处理<span class="red"> {$product} </span>次</p>
+        <p>图集模型（图片集）api已为您处理<span class="red"> {$images} </span>次</p>
+        <p>全部模型api已为您处理<span class="red"> {$archives} </span>次</p>
+    </div>
+</div>
+{include file="footer.htm" /}

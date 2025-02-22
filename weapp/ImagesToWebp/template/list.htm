@@ -1,0 +1,183 @@
+{include file="header.htm" /}
+<body class="bodystyle" style="overflow-y: scroll; cursor: default; -moz-user-select: inherit;">
+<div id="append_parent"></div>
+<div id="ajaxwaitid"></div>
+<div class="page">
+    {include file="bar.htm" /}
+    <div class="flexigrid">
+		<ul class="explanation">
+			<li>点击（图片名称）或（webp图片地址）可查看大图！</li>
+			<li>原图总大小： <span class="red">{$all_originalSize}</span></li>
+			<li>转换后总大小：<span class="red">{$all_newSize}</span></li>
+			<li>截止到今天已经为您节约了：<span class="red">{$all_zipSize}</span></li>
+			<li>截止目前一共转换 <span class="red">{$count}</span> 张图片</li>
+			<li>转换记录的删除不会删除图片，删除这里的记录只会影响上面的统计！<span class="red">不会影响您的网站图片！</span></li>
+		</ul>
+        <div class="mDiv">
+            <form class="navbar-form form-inline" action="{:weapp_url('ImagesToWebp/ImagesToWebp/index')}" method="get" onsubmit="layer_loading('正在处理');">
+                {$searchform.hidden|default=''}
+                <div class="sDiv">
+                    <div class="sDiv2">
+                        <input type="text" size="30" name="keywords" class="qsbox" placeholder="搜索图片名称...">
+                        <input type="submit" class="btn" value="搜索">
+                        <i class="fa fa-search"></i>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="hDiv">
+            <div class="hDivBox">
+                <table cellspacing="0" cellpadding="0" style="width: 100%">
+                    <thead>
+                    <tr>
+                        <th class="sign w80" axis="col0">
+                            <div class="tc"><input type="checkbox" autocomplete="off" class="checkAll"></div>
+                        </th>
+                        <th abbr="article_show" axis="col5" class="w80">
+                            <div class="tc">ID</div>
+                        </th>
+                        <th abbr="article_title" axis="col3">
+                            <div class="tc">图片名称</div>
+                        </th>
+                        <th abbr="article_time" axis="col6" class="w400">
+                            <div class="tc">webp图片地址</div>
+                        </th>
+                        <th abbr="article_time" axis="col6" class="w100">
+                            <div class="tc">原图大小</div>
+                        </th>
+                        <th abbr="article_time" axis="col6" class="w100">
+                            <div class="tc">webp图大小</div>
+                        </th>
+                        <th abbr="article_time" axis="col6" class="w100">
+                            <div class="tc">压缩大小</div>
+                        </th>
+                        <th abbr="article_time" axis="col6" class="w160">
+                            <div class="tc">转换时间</div>
+                        </th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+        <div class="bDiv" style="height: auto;">
+            <div id="flexigrid" cellpadding="0" cellspacing="0" border="0">
+                <table style="width: 100%">
+                    <tbody>
+                    {empty name="list"}
+                        <tr>
+                            <td class="no-data" align="center" axis="col0" colspan="50">
+                                <div class="no_row">
+                                    <div class="no_pic"><img src="__SKIN__/images/null-data.png"></div>
+                                </div>
+                            </td>
+                        </tr>
+                    {else/}
+                        {volist name="list" id="vo"}
+                        <tr>
+                            <td class="sign">
+                                <div class="w80 tc"><input type="checkbox" name="ids[]" value="{$vo.id}"></div>
+                            </td>
+                            <td class="sort">
+                                <div class="w80 tc">
+                                    {$vo.id}
+                                </div>
+                            </td>
+                            <td class="" style="width: 100%;">
+                                <div class="tl" style="padding-left: 10px;">
+                                    <a href="javascript:;" onclick="Images('{$vo.newUrl}', 900, 600);">{$vo.title}</a>
+                                </div>
+                            </td>
+                            <td class="">
+                                <div class="w400 tc">
+                                    <a href="javascript:;" onclick="Images('{$vo.newUrl}', 900, 600);">{$vo.newUrl}</a>
+                                </div>
+                            </td>
+                            <td class="">
+                                <div class="w100 tc">
+                                    {$vo.originalSize}
+                                </div>
+                            </td>
+                            <td class="">
+                                <div class="w100 tc">
+                                    {$vo.newSize}
+                                </div>
+                            </td>
+                            <td class="">
+                                <div class="w100 tc">
+                                    <span class="red">{$vo.zipSize}</span>
+                                </div>
+                            </td>
+                            <td class="">
+                                <div class="w160 tc">
+                                    {$vo.add_time|MyDate='Y-m-d H:i:s',###}
+                                </div>
+                            </td>
+                        </tr>
+                        {/volist}
+                    {/empty}
+                    </tbody>
+                </table>
+            </div>
+            <div class="iDiv" style="display: none;"></div>
+        </div>
+        <div class="tDiv">
+            <div class="tDiv2">
+                <div class="fbutton checkboxall">
+                    <input type="checkbox" autocomplete="off" class="checkAll">
+                </div>
+                <div class="fbutton">
+                    <a onclick="batch_del(this, 'ids');" data-url="{:weapp_url('ImagesToWebp/ImagesToWebp/del')}">
+                        <div class="add">
+                            <span>批量删除</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="fbuttonr">
+                    <div class="pages">
+                       {$pageStr}
+                    </div>
+                </div>
+                <div class="fbuttonr">
+                    <div class="total">
+                       <h5>共有{$pager->totalRows}条,每页显示
+                            <select name="pagesize" style="width: 60px;" onchange="ey_selectPagesize(this);">
+                                <option {if condition="$pager->listRows == 15"} selected {/if} value="15">15</option>
+                                <option {if condition="$pager->listRows == 30"} selected {/if} value="30">30</option>
+                                <option {if condition="$pager->listRows == 50"} selected {/if} value="50">50</option>
+                                <option {if condition="$pager->listRows == 100"} selected {/if} value="100">100</option>
+                                <option {if condition="$pager->listRows == 200"} selected {/if} value="200">200</option>
+                                <!-- <option {if condition="$pager->listRows == 500"} selected {/if} value="500">500</option> -->
+                            </select>
+                       </h5>
+                    </div>
+                </div>
+            </div>
+            <div style="clear:both"></div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function(){
+        // 表格行点击选中切换
+        $('#flexigrid > table>tbody >tr').click(function(){
+            $(this).toggleClass('trSelected');
+        });
+
+        // 点击刷新数据
+        $('.fa-refresh').click(function(){
+            location.href = location.href;
+        });
+        
+        $('input[name*=ids]').click(function(){
+            if ($('input[name*=ids]').length == $('input[name*=ids]:checked').length) {
+                $('.checkAll').prop('checked','checked');
+            } else {
+                $('.checkAll').prop('checked', false);
+            }
+        });
+        $('input[type=checkbox].checkAll').click(function(){
+            $('input[type=checkbox]').prop('checked',this.checked);
+        });
+    });
+</script>
+{include file="footer.htm" /}

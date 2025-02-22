@@ -36,12 +36,12 @@ return array (
     'primary' => false,
     'autoinc' => false,
   ),
-  'seo_parameters' => 
+  'status' => 
   array (
-    'name' => 'seo_parameters',
-    'type' => 'text',
+    'name' => 'status',
+    'type' => 'tinyint(1) unsigned zerofill',
     'notnull' => false,
-    'default' => NULL,
+    'default' => '0',
     'primary' => false,
     'autoinc' => false,
   ),
