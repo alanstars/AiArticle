@@ -59,8 +59,11 @@
                 } else {
                     url += '?';
                 }
-                url += 'typeid=' + typeid;
-                console.log(url);
+                var langs = $(this).attr('data-lang');
+                if (langs) {
+                    url += 'langs=' + langs;
+                }
+                url += '&typeid=' + typeid;
                 parent.window.location = url;
                 return false;
                 if (2 === parseInt(current_channel)) {

@@ -40,6 +40,7 @@ class AiArticle extends Weapp
     private $articleConf;
     private $articleLists;
     private $langSwitchOn;
+    private $langLists;
 
     /**
      * 插件基本信息
@@ -64,7 +65,13 @@ class AiArticle extends Weapp
         /*获取当前系统是否为多语言*/
         $this->langSwitchOn = false;
         if (is_language()) {
+            $langs = Db::name('language')->field('mark')->select();
             $this->langSwitchOn = true;
+            foreach ($langs as $key => $val) {
+                $this->langLists[] = $val['mark'];
+            }
+        }else{
+            $this->langLists[] = get_main_lang();
         }
 
         //获取当前插件的用户配置信息
@@ -74,7 +81,7 @@ class AiArticle extends Weapp
         /* 获取当前多语言状态 */
         $this->assign('langSwitchOn', $this->langSwitchOn);
         /*获取当前系统语言*/
-        $this->lang = $_GET['lang'];
+        $this->lang = get_current_lang();
         $this->assign('lang', $this->lang);
         /*插件基本信息*/
         $this->weappInfo = $this->getWeappInfo();
@@ -117,7 +124,7 @@ class AiArticle extends Weapp
             $map['title'] = array('LIKE', "%{$keywords}%");
         }
 
-        $count = $this->db->where($map)->count('id');// 查询满足要求的总记录数
+        $count = M('weapp_ai_article_lists')->where($map)->count('id');// 查询满足要求的总记录数
         $pageObj = new Page($count, config('paginate.list_rows'));// 实例化分页类 传入总记录数和每页显示的记录数
         $list = M('weapp_ai_article_lists')->where($map)->order('id desc')->limit($pageObj->firstRow . ',' . $pageObj->listRows)->select();
         $pageStr = $pageObj->show(); // 分页显示输出
@@ -132,7 +139,13 @@ class AiArticle extends Weapp
      */
     public function selectType()
     {
-        $select_html = allow_release_arctype(0, [1]);
+        // $select_html = allow_release_arctype(0, [1]);
+        
+        //获取eyoucms中为文章模型的所有的栏目列表结束
+ 
+        $select_html = $this->getArcTypes(0);
+        //生成 HTML 格式的 select option 列表
+
         $this->assign('js_allow_channel_arr', [1]);
 
         $this->assign('select_html', $select_html);
@@ -154,23 +167,9 @@ class AiArticle extends Weapp
         $auth_role_info = $admin_info['auth_role_info'];
         $this->assign('auth_role_info', $auth_role_info);
         $this->assign('admin_info', $admin_info);
-        // if (!empty($tId)) {
-        //     $ai = new AiArticleLogic($aiConfig['ai_config_key'], $aiConfig['ai_model_identifier']);
-        //     $response = $ai->getMessage($Data['article_theme']);
-        //     if ($response['code'] == 200) {
-        //         $data = $response['data'];
-        //         $articleData['title'] = $data['title'];
-        //         $articleData['content'] = $data['content'];
-        //         $articleData['keywords'] = data['keywords'];
-        //         $articleData['description'] = $data['description'];
-        //         $this->assign('articleData', $articleData);
-        //     }else{
-        //         return $this->error($response['msg']);
-        //     }
-        //     // dump($articleData);
-        // }
+
         $typeid = input('typeid/d', 0);
-        ;
+
         $assign_data['typeid'] = $typeid;
 
         $arctypeInfo = Db::name('arctype')->find($typeid);
@@ -179,7 +178,8 @@ class AiArticle extends Weapp
         $this->channeltype = $channeltype_list[$this->nid];
         empty($this->channeltype) && $this->channeltype = 1;
         //允许发布文档列表的栏目
-        $arctype_html = allow_release_arctype($typeid, array($this->channeltype));
+        // $arctype_html = allow_release_arctype($typeid, array($this->channeltype));
+        $arctype_html = $this->getArcTypes($typeid);
         $assign_data['arctype_html'] = $arctype_html;
 
         // 阅读权限
@@ -487,14 +487,18 @@ class AiArticle extends Weapp
      * @param int $level 层级
      *
      **/
-    private function selectTree($tree, $level = 0)
+    private function selectTree($tree, $level = 0,$selected = 0)
     {
         $html = '';
-        $nbsp = str_repeat('&nbsp;', $level * 4);
+        $nbsp = str_repeat('&nbsp;', $level*2);
         foreach ($tree as $node) {
-            $html .= '<option data-lang="' . $node['lang'] . '" value="' . $node['id'] . '">' . $nbsp . $node['typename'] . '</option>';
+            //id,parent_id,topid,typename,lang
+            //<option value="16" data-grade="2" data-current_channel="1">&nbsp;&nbsp;&nbsp;&nbsp;333 级</option>
+            $selected_str = $selected == $node['id'] ? ' selected ' : '';
+            $atrr = "data-grade='{$node['level']}' data-current_channel='{$node['current_channel']}' data-lang='{$node['lang']}'";
+            $html .= '<option ' . $atrr . ' value="' . $node['id'] . '"'.$selected_str.'>' . $nbsp . $node['typename'] . '</option>';
             if (!empty($node['children'])) {
-                $html .= $this->selectTree($node['children'], $level + 1);
+                $html .= $this->selectTree($node['children'], $level+1, $selected);
             }
         }
         return $html;
@@ -530,6 +534,10 @@ class AiArticle extends Weapp
 
         if (IS_POST) {
             $post = input('post.');
+            if(isset($post['langs']) && !empty($post['langs'])){
+                $this->lang = $post['langs'];
+                $this->admin_lang = $post['langs'];
+            }
             model('Archives')->editor_auto_210607($post);
             //处理TAG标签
             if (!empty($post['tags_new'])) {
@@ -686,25 +694,7 @@ class AiArticle extends Weapp
             $aid = Db::name('archives')->insertGetId($data);
             if (!empty($aid)) {
                 $_POST['aid'] = $aid;
-                if (!empty($post['restric_type']) && 0 < $post['restric_type']) {
-                    if (empty($post['size'])) {
-                        $post['size'] = 1;
-                    }
-                    $free_content = !empty($post['free_content']) ? $post['free_content'] : '';
-                    if (!empty($post['part_free']) && 2 == $post['part_free']) {
-                        $free_content = htmlspecialchars_decode($post['addonFieldExt']['content']);
-                        $free_content = $this->SpLongBody($free_content, $post['size']);
-                        // $free_content = $this->SpLongBody($free_content,$post['size']*1024);
-                        $free_content = htmlspecialchars($free_content);
-                    }
-                    Db::name('article_pay')->insert([
-                        'aid' => $aid,
-                        'part_free' => isset($post['part_free']) ? intval($post['part_free']) : 0,
-                        'size' => $post['size'],
-                        'free_content' => $free_content,
-                        'add_time' => getTime(),
-                    ]);
-                }
+                
                 model('Article')->afterSave($aid, $data, 'add');
                 M('weapp_ai_article_lists')->where(['id' => $post['new_id']])->update(['aid' => $aid, 'typeid' => $post['typeid'], 'status' => 1, 'publish_time' => getTime(), 'updated_time' => getTime()]);
                 // 添加查询执行语句到mysql缓存表
@@ -728,79 +718,20 @@ class AiArticle extends Weapp
             }
             $this->error("操作失败!");
         }
-
-        $typeid = input('param.typeid/d', 0);
-        $assign_data['typeid'] = $typeid;
-
-        $arctypeInfo = Db::name('arctype')->find($typeid);
-
-        //允许发布文档列表的栏目
-        $arctype_html = allow_release_arctype($typeid, array($this->channeltype));
-        $assign_data['arctype_html'] = $arctype_html;
-
-        // 阅读权限
-        $arcrank_list = get_arcrank_list();
-        $assign_data['arcrank_list'] = $arcrank_list;
-
-        // 模板列表
-        $archivesLogic = new \app\admin\logic\ArchivesLogic;
-        $templateList = $archivesLogic->getTemplateList($this->nid);
-        $assign_data['templateList'] = $templateList;
-
-        // 默认模板文件
-        $tempview = 'view_' . $this->nid . '.' . config('template.view_suffix');
-        !empty($arctypeInfo['tempview']) && $tempview = $arctypeInfo['tempview'];
-        $assign_data['tempview'] = $tempview;
-
-        // 会员等级信息
-        $assign_data['users_level'] = model('UsersLevel')->getList('level_id, level_name, level_value');
-
-        // 文档默认浏览量
-        $globalConfig = tpCache('global');
-        if (isset($globalConfig['other_arcclick']) && 0 <= $globalConfig['other_arcclick']) {
-            $arcclick_arr = explode("|", $globalConfig['other_arcclick']);
-            if (count($arcclick_arr) > 1) {
-                $assign_data['rand_arcclick'] = mt_rand($arcclick_arr[0], $arcclick_arr[1]);
-            } else {
-                $assign_data['rand_arcclick'] = intval($arcclick_arr[0]);
-            }
-        } else {
-            $arcclick_config['other_arcclick'] = '500|1000';
-            tpCache('other', $arcclick_config);
-            $assign_data['rand_arcclick'] = mt_rand(500, 1000);
-        }
-
-        // URL模式
-        $tpcache = config('tpcache');
-        $assign_data['seo_pseudo'] = !empty($tpcache['seo_pseudo']) ? $tpcache['seo_pseudo'] : 1;
-
-        /*文档属性*/
-        $assign_data['archives_flags'] = model('ArchivesFlag')->getList();
-
-        $channelRow = Db::name('channeltype')->where('id', $this->channeltype)->find();
-        $channelRow['data'] = json_decode($channelRow['data'], true);
-        $assign_data['channelRow'] = $channelRow;
-
-        // 来源列表
-        $system_originlist = tpSetting('system.system_originlist');
-        $system_originlist = json_decode($system_originlist, true);
-        $system_originlist = !empty($system_originlist) ? $system_originlist : [];
-        $assign_data['system_originlist_0'] = !empty($system_originlist) ? $system_originlist[0] : "";
-        $assign_data['system_originlist_str'] = implode(PHP_EOL, $system_originlist);
-
-        // 多站点，当用站点域名访问后台，发布文档自动选择当前所属区域
-        model('Citysite')->auto_location_select($assign_data);
-
-        $this->assign($assign_data);
-
-        // 如果安装手机端后台管理插件并且在手机端访问时执行
-        if (is_dir('./weapp/Mbackend/') && !empty($isMobile)) {
-            $this->assign('arctypeInfo', $arctypeInfo);
-            return $this->display('archives/add');
-        } else {
-            return $this->fetch();
-        }
     }
 
+    public function getArcTypes($typeid = 0){
+        if ($this->langSwitchOn) {
+            $articleTypeList = Db::name('arctype')->where('lang', 'in', $this->langLists)->field('id,parent_id,topid,typename,lang,current_channel')->where('channeltype=1')->select();
+        }else{
+            $articleTypeList = Db::name('arctype')->where(array('lang' => $this->lang))->field('id,parent_id,topid,typename,lang,current_channel')->where('channeltype=1')->select();
+        }
+
+        //获取eyoucms中为文章模型的所有的栏目列表
+        $treeNow = $this->buildTree($articleTypeList, 0);
+        //生成 HTML 格式的 select option 列表
+        $select_html = $this->selectTree($treeNow,0,$typeid);
+        return $select_html;
+    }
 
 }
