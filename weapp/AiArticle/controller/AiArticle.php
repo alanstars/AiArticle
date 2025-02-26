@@ -534,9 +534,12 @@ class AiArticle extends Weapp
 
         if (IS_POST) {
             $post = input('post.');
-            if(isset($post['langs']) && !empty($post['langs'])){
-                $this->lang = $post['langs'];
-                $this->admin_lang = $post['langs'];
+            if(isset($post['typeid']) && !empty($post['typeid'])){
+                $post['lang'] = Db::name('arctype')->where('id', '=',$post['typeid'])->value('lang');
+                $this->lang = $post['lang'];
+                $this->admin_lang = $post['lang'];
+            }else{
+                return $this->error('请选择栏目！');
             }
             model('Archives')->editor_auto_210607($post);
             //处理TAG标签
@@ -691,11 +694,12 @@ class AiArticle extends Weapp
                 'update_time' => strtotime($post['add_time']),
             );
             $data = array_merge($post, $newData);
+            $data['lang'] = $this->admin_lang;
             $aid = Db::name('archives')->insertGetId($data);
             if (!empty($aid)) {
                 $_POST['aid'] = $aid;
-                
-                model('Article')->afterSave($aid, $data, 'add');
+                $ArticleModel = new \weapp\AiArticle\model\ArticleModel;
+                $ArticleModel->afterSave($aid, $data, 'add');
                 M('weapp_ai_article_lists')->where(['id' => $post['new_id']])->update(['aid' => $aid, 'typeid' => $post['typeid'], 'status' => 1, 'publish_time' => getTime(), 'updated_time' => getTime()]);
                 // 添加查询执行语句到mysql缓存表
                 model('SqlCacheTable')->InsertSqlCacheTable();

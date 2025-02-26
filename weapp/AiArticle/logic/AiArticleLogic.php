@@ -304,4 +304,8 @@ class AiArticleLogic
         }
         return $result;
     }
+
+
+
+    
 }
