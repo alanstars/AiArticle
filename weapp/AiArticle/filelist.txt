@@ -1,6 +1,2 @@
-template/plugins/aiarticle/pc/index.htm
-template/plugins/aiarticle/mobile/index.htm
-application/plugins/logic/AiArticleLogic.php
-application/plugins/controller/AiArticle.php
-application/plugins/model/AiArticle.php
-weapp/AiArticle
+application/plugins/model/AiArticle.php
+weapp/AiArticle
