@@ -33,7 +33,7 @@ class AiArticleLogic
      * @param string $ChatModel 调用AI 的具体模型
      * @param string $apiKey API 密钥
      */
-    public function __construct($apiKey,$AiModel, $ChatModel='')
+    public function __construct($apiKey, $AiModel, $ChatModel = '')
     {
         if (empty($apiKey) || empty($AiModel)) {
             return "Error: API key and AI model are required.";
@@ -44,8 +44,8 @@ class AiArticleLogic
     }
     function getMessage($message)
     {
-        if(empty($message)){
-            return "Error: Message cannot be empty."; 
+        if (empty($message)) {
+            return "Error: Message cannot be empty.";
         }
         switch ($this->AiModel) {
             case 'OpenAI':
@@ -95,60 +95,39 @@ class AiArticleLogic
 4. 采用合适的 HTML 标题标签（如 H1、H2、H3、p、b等）来组织文章内容，增强文章的可读性和搜索引擎友好性。
 5. 文章长度应依据主题的复杂程度和深度灵活确定，一般情况下不少于 800 字，以便为搜索引擎提供充足的内容进行索引。
 6. 高度重视语法和拼写错误，通过仔细校对保证文章质量达到较高水准。
-7. 严格按照规定的文章格式生成内容，格式为：【标题开始】(标题)【标题结束】，换行后，【关键词开始】（SEO关键词，多个关键词使用半角逗号隔开）【关键词结束】，【SEO描述开始】（SEO 描述，字数控制在 100 字左右）【SEO描述结束】，再次换行后，【正文开始】（正文内容）【正文结束】。若生成多篇文章，需在最开头添加【多篇文章】，并在每一篇文章的开头加上【第几篇开始】，结尾加上【第几篇结束】。'
+7. 严格按照规定的文章格式生成内容，格式为：【标题开始】(标题)【标题结束】，换行后，【关键词开始】（SEO关键词，多个关键词使用半角逗号隔开）【关键词结束】，【SEO描述开始】（SEO 描述，字数控制在 100 字左右）【SEO描述结束】，再次换行后，【正文开始】（正文内容，内容出现的[SEO关键词]加粗处理）【正文结束】。若生成多篇文章，需在最开头添加【多篇文章】，并在每一篇文章的开头加上【第几篇开始】，结尾加上【第几篇结束】。
+8. 文章内容需与用户给定的主题相关，不得出现与主题无关的内容。
+9. 文章内容需符合 SEO 最佳实践，包括标题、关键词、描述等方面的优化。
+10.严格按照以上要求执行。'
                 ],
                 ['role' => 'user', 'content' => $message],
             ],
         ];
 
-        // 初始化cURL会话
-        $ch = curl_init($url);
-
-        // 设置cURL选项
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-        // 执行cURL会话并获取响应
-        $response = curl_exec($ch);
-
-        // 检查是否有错误发生
-        if (curl_errno($ch)) {
-            $error_msg = curl_error($ch);
-            curl_close($ch);
-            return "Error: " . $error_msg;
-        }
-
-        // 关闭cURL会话
-        curl_close($ch);
-
+        //curl 初始化
+        $response = $this->getCurl($url, $data, $headers);
 
         // 解析响应
         $responseData = json_decode($response, true);
         // return $responseData;
         // 检查响应是否有效
-        if(empty($responseData)){
-            return ['code'=>4004,'data'=>[],'msg'=>'Error: Unable to get a valid response from DeepSeek.Key:'. $this->apiKey. "；ChatModel:". $this->ChatModel. "；AiModel:". $this->AiModel. ""];
+        if (empty($responseData)) {
+            return ['code' => 4004, 'data' => [], 'msg' => 'Error: Unable to get a valid response from DeepSeek.Key:' . $this->apiKey . "；ChatModel:" . $this->ChatModel . "；AiModel:" . $this->AiModel . ""];
         }
         if (isset($responseData['choices'][0]['message']['content'])) {
             $articleContent = $responseData['choices'][0]['message']['content'];
             $result = $this->cleanData($articleContent);
             $result['all'] = $responseData;
             // return $articleContent;
-            return ['code'=>200,'data'=>$result,'msg'=>'success'];
+            return ['code' => 200, 'data' => $result, 'msg' => 'success'];
         } else {
             // 打印错误信息
             // dump($responseData);
-            return ['code'=>$responseData['error']['code'],'data'=>$responseData,'msg'=>$responseData['error']['message']];
+            return ['code' => $responseData['error']['code'], 'data' => $responseData, 'msg' => $responseData['error']['message']];
         }
     }
+
+ 
 
 
     /**
@@ -261,7 +240,8 @@ class AiArticleLogic
             return "Error: Unable to get balance information from OpenAI.";
         }
     }
-    
+
+
     //清洗数据
     public function cleanData($articleContent)
     {
@@ -282,7 +262,7 @@ class AiArticleLogic
                     'content' => trim($match[5]), // 正文内容
                 ];
             }
-        
+
         } else {
             // 单篇文章处理
             preg_match('/【标题开始】(.*?)【标题结束】/', $articleContent, $titleMatches);
@@ -307,5 +287,35 @@ class AiArticleLogic
 
 
 
-    
+    function getCurl($url, $data = null, $headers = null)
+    {
+        // 初始化cURL会话
+        $ch = curl_init($url);
+
+        // 设置cURL选项
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        // 执行cURL会话并获取响应
+        $response = curl_exec($ch);
+
+        // 检查是否有错误发生
+        if (curl_errno($ch)) {
+            $error_msg = curl_error($ch);
+            curl_close($ch);
+            return "Error: " . $error_msg;
+        }
+
+        // 关闭cURL会话
+        curl_close($ch);
+        return $response;
+    }
 }

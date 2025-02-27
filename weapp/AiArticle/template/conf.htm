@@ -26,11 +26,12 @@
                 </dt>
                 <dd class="opt">
                     <input type="text" name="ai_config_key" value="{$row.ai_config_key}" id="ai_config_key" class="input-txt" required>
+                    <a href="javascript:;" onclick="getBanlance()">查询余额</a>&nbsp;&nbsp;<span id="banlance" style="display: none;">0元</span>
                     <span class="err"></span>
-                    <p class="notic"></p>
+                    <p class="notic">只支持 DeepSeek，如需申请密钥KEY，请查看右上角【使用教程】</p>
                 </dd>
             </dl>
-            <dl class="row">
+            <!-- <dl class="row">
                 <dt class="tit">
                     <label for="translate_model_identifier"><em>*</em>AI 翻译模型</label>
                 </dt>
@@ -54,7 +55,7 @@
                     <span class="err"></span>
                     <p class="notic"></p>
                 </dd>
-            </dl>
+            </dl> -->
             <div class="bot">
                 <input type="hidden" name="id" value="{$row.id}" />
                 <a href="JavaScript:void(0);" onclick="checkForm();" class="ncap-btn-big ncap-btn-green" id="submitBtn">确认提交</a>
@@ -71,11 +72,11 @@
             $('input[name=ai_config_key]').focus();
             return false;
         }
-        if($('input[name=translate_config_key]').val() == ''){
-            showErrorMsg('AI 翻译密钥KEY不能为空！');
-            $('input[name=translate_config_key]').focus();
-            return false;
-        }
+        // if($('input[name=translate_config_key]').val() == ''){
+        //     showErrorMsg('AI 翻译密钥KEY不能为空！');
+        //     $('input[name=translate_config_key]').focus();
+        //     return false;
+        // }
         //选中translate_model_identifier 下的某一项，自动获取 data-name 的值
         var ai_model_name = $('select[name=ai_model_identifier]').find('option:selected').data('name');
         var translate_model_name = $('select[name=translate_model_identifier]').find('option:selected').data('name');
@@ -105,6 +106,31 @@
                 showErrorAlert(e.responseText);
             }
         });
+    }
+    //查询余额
+    function getBanlance(){
+        var apiKey = $('input[name=ai_config_key]').val(); 
+        if(apiKey == ''){
+            showErrorMsg('AI 模型密钥KEY不能为空！');
+            $('input[name=ai_config_key]').focus();
+            return false; 
+        }
+        layer_loading('正在查询');
+        $.ajax({
+            type : 'post',
+            url : "{:weapp_url('AiArticle/AiArticle/getDeepSeekBalance', ['_ajax'=>1])}",
+            data : {apiKey:apiKey},
+            dataType : 'json',
+            success : function(res){
+                layer.closeAll();
+                if(res.code == 1){
+                    $('#banlance').show();
+                    $('#banlance').text(res.data.currency+':'+res.data.total_balance + '元');
+                }else{
+                    showErrorMsg(res.msg);
+                }
+            }, 
+        })
     }
 </script>
 {include file="footer.htm" /}

@@ -18,11 +18,11 @@ return array(
     'code' => 'AiArticle', // 插件标识
     'name' => 'Ai文章自动更新', // 插件名称
     'version' => 'v1.0.0', // 插件版本号
-    'min_version' => 'v1.7.0', // CMS最低版本支持
+    'min_version' => 'v1.6.5', // CMS最低版本支持
     'author' => '学乎者也', // 开发者
-    'description' => 'Ai 自动生成文章，定时自动更新，支持多语言1', // 插件描述
+    'description' => 'AI 大模型 DeepSeek 自动生成文章，自动生成标题，自动生成关键词，自动生成 SEO 描述，自动更新到所选栏目中，支持多语言； 后续会更新根据设定的主题定时更新，定时发布等功能', // 插件描述
     'litpic'    => '/weapp/AiArticle/logo.png',
-    'scene' => '0',  // 使用场景 0 PC+手机 1 手机 2 PC
+    'scene' => '2',  // 使用场景 0 PC+手机 1 手机 2 PC
     'subroot' => 'on',
     // 'install_target' => '_self',
     'permission' => [],

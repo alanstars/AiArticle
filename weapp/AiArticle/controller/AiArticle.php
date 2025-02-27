@@ -737,5 +737,42 @@ class AiArticle extends Weapp
         $select_html = $this->selectTree($treeNow,0,$typeid);
         return $select_html;
     }
+  
+    public function getDeepSeekBalance()
+    {
+        $apiKey = input('apiKey/s');
+        if (empty($apiKey)) {
+            return $this->error('请输入API Key'); 
+        }
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'https://api.deepseek.com/user/balance',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+            CURLOPT_HTTPHEADER => array(
+                'Accept: application/json',
+                'Authorization: Bearer '.$apiKey
+            ),
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+        if (empty($response)) {
+            return $this->error('获取失败'); 
+        }
+        $result = json_decode($response, true);
+        if(isset($result['is_available'])){
+            return $this->success('获取成功', '', $result['balance_infos'][0]);
+        }else{
+            return $this->error($result['error']['message'], '', $result['error']);
+        }
+    }
 
 }
