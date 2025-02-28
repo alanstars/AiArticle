@@ -1,2 +1,0 @@
-application/plugins/model/AiArticle.php
-weapp/AiArticle
