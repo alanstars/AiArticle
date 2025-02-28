@@ -1,1 +1,0 @@
-var bdmap_ak = '';
