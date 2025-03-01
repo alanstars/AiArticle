@@ -81,8 +81,9 @@ class AiArticle extends Weapp
         /* 获取当前多语言状态 */
         $this->assign('langSwitchOn', $this->langSwitchOn);
         /*获取当前系统语言*/
-        $this->lang = get_current_lang();
+        $this->lang = get_admin_lang();
         $this->assign('lang', $this->lang);
+        $this->assign('admin_lang', $this->lang);
         /*插件基本信息*/
         $this->weappInfo = $this->getWeappInfo();
         $this->assign('weappInfo', $this->weappInfo);
