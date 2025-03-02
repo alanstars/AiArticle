@@ -1,13 +1,5 @@
-/*
-Navicat MySQL Data Transfer
-*/
-
 SET FOREIGN_KEY_CHECKS=0;
 
--- ----------------------------
--- Table structure for #@__weapp_ai_article
--- 表字段说明:文章规则生成配置表
--- ----------------------------
 DROP TABLE IF EXISTS `#@__weapp_ai_article`;
 CREATE TABLE `#@__weapp_ai_article` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
@@ -27,10 +19,6 @@ CREATE TABLE `#@__weapp_ai_article` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='AI文章生成配置表';
 
--- ----------------------------------
--- Table structure for #@__weapp_ai_article_conf
--- 表字段说明:插件全局配置参数
--- ----------------------------------
 DROP TABLE IF EXISTS `#@__weapp_ai_article_conf`;
 CREATE TABLE `#@__weapp_ai_article_conf` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
@@ -45,10 +33,7 @@ CREATE TABLE `#@__weapp_ai_article_conf` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='插件全局配置参数表';
 
--- ----------------------------
--- Records of #@__weapp_ai_article_lists
--- 生成文章的记录表
--- ----------------------------
+
 DROP TABLE IF EXISTS `#@__weapp_ai_article_lists`;
 CREATE TABLE `#@__weapp_ai_article_lists` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
@@ -71,4 +56,3 @@ CREATE TABLE `#@__weapp_ai_article_lists` (
   `finish_reason` varchar(100) DEFAULT '' COMMENT '结束原因：stop 正常',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='AI文章列表';
-

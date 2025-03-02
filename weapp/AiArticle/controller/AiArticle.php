@@ -158,7 +158,7 @@ class AiArticle extends Weapp
      */
     public function addArticle()
     {
-        $tId = input('tId/s');
+        $a_id = input('a_id/s');
         $aiConfig = cache('articleConf');
 
         // 手机端后台管理插件标识
@@ -232,7 +232,12 @@ class AiArticle extends Weapp
         $system_originlist = !empty($system_originlist) ? $system_originlist : [];
         $assign_data['system_originlist_0'] = !empty($system_originlist) ? $system_originlist[0] : "";
         $assign_data['system_originlist_str'] = implode(PHP_EOL, $system_originlist);
-
+        if(!empty($a_id) && !empty($typeid)){
+            $aiArticle = M('weapp_ai_article_lists')->where(['id' => $a_id, 'typeid' => $typeid])->field('title,seo_title,seo_keywords,seo_description,content')->find();
+            $aiArticle['a_id'] = $a_id;
+            $aiArticle['content'] = json_encode($aiArticle['content']);
+            $this->assign('aiArticle', $aiArticle);
+        }
 
         $this->assign($assign_data);
 
@@ -404,10 +409,10 @@ class AiArticle extends Weapp
         $id_arr = input('del_id/a');
         $id_arr = eyIntval($id_arr);
         if (!empty($id_arr) && IS_POST) {
-            $result = $this->db->where("id", 'IN', $id_arr)->select();
+            $result = M('weapp_ai_article_lists')->where("id", 'IN', $id_arr)->select();
             $title_list = get_arr_column($result, 'title');
 
-            $r = $this->db->where("id", 'IN', $id_arr)->delete();
+            $r = M('weapp_ai_article_lists')->where("id", 'IN', $id_arr)->delete();
             if ($r !== false) {
                 adminLog('删除' . $this->weappInfo['name'] . '：' . implode(',', $title_list));
                 $this->success("操作成功!");

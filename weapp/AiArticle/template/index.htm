@@ -120,6 +120,9 @@
                             </td>
                             <td class="sort">
                                 <div class="w60 tc">
+                                    {if condition="$vo.status == 0"}
+                                    <a href="{:weapp_url('AiArticle/AiArticle/addArticle',['a_id'=>$vo.id,'typeid'=>$vo.typeid])}" href="_blank" class="btn blue">重新发布</a>
+                                    {/if}
                                     <a href="" href="_blank" class="btn blue">预览</a>
                                 </div>
                             </td>
